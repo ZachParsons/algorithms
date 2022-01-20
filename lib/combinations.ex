@@ -5,7 +5,7 @@ defmodule Algorithms.Combinations do
   end
 
   def run(_elements, 0), do: [[]]
-  def run(elements = [], size), do: elements
+  def run(elements = [], _size), do: elements
 
   def run([head | tail], size) do
     Enum.map(run(tail, size - 1), &[head | &1]) ++
