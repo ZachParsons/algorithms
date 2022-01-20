@@ -29,4 +29,8 @@ defmodule Algorithms.CombinationsTest do
   test "failure: invalid size" do
     assert "invalid input" == Combinations.run([:a], 1.5)
   end
+
+  test "failure: 2, 3" do
+    assert "invalid input" == Combinations.run([:a, :b], 3)
+  end
 end
