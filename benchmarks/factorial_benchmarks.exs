@@ -2,7 +2,6 @@ defmodule Algorithms.FactorialBenchmarks do
   @moduledoc """
     To run: `mix run <path>`.
   """
-
   alias Algorithms.Factorial
 
   Benchee.run(
