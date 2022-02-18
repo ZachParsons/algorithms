@@ -6,8 +6,7 @@ defmodule Algorithms.LongestSubstring do
   def run(string) do
     string
     |> String.graphemes()
-    |> Enum.reduce([], fn char, acc ->
-      acc = if Enum.count(acc) == 0, do: [char], else: acc
+    |> Enum.reduce([""], fn char, acc ->
       [head | tail] = acc
 
       head
