@@ -1,4 +1,4 @@
-defmodule Algorithms.LongestSubstring do
+defmodule Algorithms.LongestUniqueSubstring do
   @moduledoc """
     Given a string, find the length of the longest substring without repeating characters.
   """
