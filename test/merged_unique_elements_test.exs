@@ -16,7 +16,7 @@ defmodule Algorithms.MergedUniqueElementsTest do
     assert [-1, -1, 0, 1, 2, 3, 4, 5, 1, 3, 5, 7] == MUE.merge(list1, list2)
   end
 
-  test "build_map/1", %{
+  test "map_counts/1", %{
     list1: list1
   } do
     assert %{
@@ -27,10 +27,31 @@ defmodule Algorithms.MergedUniqueElementsTest do
              3 => 1,
              4 => 1,
              5 => 1
-           } == MUE.count_map(list1)
+           } == MUE.map_counts(list1)
   end
 
-  # test "success" do
-  #   assert [ 0, 2, 4 ] == Recapped.run(list1, list2, n)
-  # end
+  test "filter_counts/1" do
+    int_counts = %{
+      2 => 2,
+      1 => 3,
+      3 => 1
+    }
+
+    assert [
+             {3, 1}
+           ] == MUE.filter_counts(int_counts)
+  end
+
+  test "take_ints/2" do
+    int_counts = [{1, 3}, {2, 2}]
+    assert [1] == MUE.take_ints(int_counts, 1)
+  end
+
+  test "run/3", %{
+    list1: list1,
+    list2: list2,
+    n: n
+  } do
+    assert [0, 2, 4] == MUE.run(list1, list2, n)
+  end
 end
