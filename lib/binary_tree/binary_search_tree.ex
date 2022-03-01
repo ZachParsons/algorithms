@@ -1,11 +1,11 @@
-defmodule Algorithms.BinaryTree do
+defmodule Algorithms.BinarySearchTree do
   # TODO:
   # 1. traverse
   # 2. insert
   # 3. delete
   # 4. move subtree
 
-  defmodule BTNode do
+  defmodule BSTNode do
     defstruct value: nil,
               left: nil,
               right: nil
