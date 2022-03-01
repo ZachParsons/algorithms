@@ -13,4 +13,10 @@ defmodule Algorithms.StackTest do
     result = Stack.pop_bif(stack)
     assert {3, [1, 2]} = result
   end
+
+  test "pop_recursive/1" do
+    stack = [1, 2, 3]
+    result = Stack.pop_recursive(stack)
+    assert 3 = result
+  end
 end

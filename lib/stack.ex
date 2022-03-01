@@ -15,6 +15,8 @@ defmodule Algorithms.Stack do
 
   def pop_bif(stack), do: List.pop_at(stack, -1)
 
+  def pop_recursive([h | _t] = stack) when length(stack) == 1, do: h
+  def pop_recursive([_h | t] = stack) when length(stack) > 1, do: pop_recursive(t)
+
   def push(stack, element), do: stack ++ [element]
 end
-
