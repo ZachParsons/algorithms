@@ -5,11 +5,7 @@ defmodule Algorithms.BinarySearchTree do
   # 3. delete
   # 4. move subtree
 
-  defmodule BSTNode do
-    defstruct value: nil,
-              left: nil,
-              right: nil
-  end
+
 
   # def find(value, node) do
   #   if node.value == value do

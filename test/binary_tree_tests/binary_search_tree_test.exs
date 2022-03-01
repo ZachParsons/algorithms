@@ -1,25 +1,25 @@
 defmodule Algorithms.BinarySearchTreeTest do
   use ExUnit.Case
   alias Algorithms.BinarySearchTree
-  alias Algorithms.BinarySearchTree.BSTNode
+  alias Algorithms.BinaryTree.Node
 
   describe "find/2" do
     setup do
       [
-        tree: %BSTNode{
+        tree: %Node{
           value: 6,
-          left: %BSTNode{
+          left: %Node{
             value: 5,
-            left: %BSTNode{
+            left: %Node{
               value: 4,
               left: nil,
               right: nil
             },
             right: nil
           },
-          right: %BSTNode{
+          right: %Node{
             value: 9,
-            left: %BSTNode{
+            left: %Node{
               value: 7,
               left: nil,
               right: nil
@@ -31,9 +31,9 @@ defmodule Algorithms.BinarySearchTreeTest do
     end
 
     test "Found", %{tree: tree} do
-      assert %BSTNode{
+      assert %Node{
                value: 9,
-               left: %BSTNode{
+               left: %Node{
                  left: nil,
                  right: nil,
                  value: 7
