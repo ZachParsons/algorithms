@@ -8,7 +8,7 @@ defmodule Algorithms.Stack do
 
   def pop_reduce([_h | t] = stack) do
     # {h, t}
-    Enum.reduce(stack, [], fn(element, acc)->
+    Enum.reduce(stack, [], fn element, acc ->
       if t == [], do: acc, else: element
     end)
   end

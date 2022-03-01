@@ -5,8 +5,6 @@ defmodule Algorithms.BinarySearchTree do
   # 3. delete
   # 4. move subtree
 
-
-
   # def find(value, node) do
   #   if node.value == value do
   #     node
