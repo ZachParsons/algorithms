@@ -8,10 +8,16 @@ defmodule Algorithms.StackTest do
     assert 3 = result
   end
 
-  test "pop_bif/1" do
+  test "bif_pop_at/1" do
     stack = [1, 2, 3]
-    result = Stack.pop_bif(stack)
+    result = Stack.bif_pop_at(stack)
     assert {3, [1, 2]} = result
+  end
+
+  test "bif_last/1" do
+    stack = [1, 2, 3]
+    result = Stack.bif_last(stack)
+    assert 3 = result
   end
 
   test "pop_recursive/1" do

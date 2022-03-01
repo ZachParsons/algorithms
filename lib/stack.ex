@@ -13,7 +13,8 @@ defmodule Algorithms.Stack do
     end)
   end
 
-  def pop_bif(stack), do: List.pop_at(stack, -1)
+  def bif_pop_at(stack), do: List.pop_at(stack, -1)
+  def bif_last(stack), do: List.last(stack)
 
   def pop_recursive([h | _t] = stack) when length(stack) == 1, do: h
   def pop_recursive([_h | t] = stack) when length(stack) > 1, do: pop_recursive(t)
