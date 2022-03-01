@@ -10,7 +10,7 @@ defmodule Algorithms.StackTest do
 
   test "pop_bif/1" do
     stack = [1, 2, 3]
-    result = Stack.pop_reduce(stack)
-    assert 3 = result
+    result = Stack.pop_bif(stack)
+    assert {3, [1, 2]} = result
   end
 end
