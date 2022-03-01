@@ -39,11 +39,11 @@ defmodule Algorithms.BinarySearchTreeTest do
                  value: 7
                },
                right: nil
-             } == BinarySearchTree.get(9, tree)
+             } == BinarySearchTree.find(9, tree)
     end
 
     test "Not found", %{tree: tree} do
-      assert :not_found == BinarySearchTree.get(2, tree)
+      assert :not_found == BinarySearchTree.find(2, tree)
     end
   end
 end
