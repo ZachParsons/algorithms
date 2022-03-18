@@ -6,8 +6,21 @@ defmodule Algorithms.Queue do
   def empty?([]), do: true
   def empty?(_), do: false
 
+  def enqueue(queue, element), do: queue ++ [element]
+
   def dequeue([h | t]), do: {h, t}
+
   def dequeued([h | _t]), do: h
 
-  def enqueue(queue, element), do: queue ++ [element]
+  def erl_is_empty?(queue) do
+    :queue.is_empty(queue)
+  end
+
+  def erl_enqueue(element, queue) do
+    :queue.in(element, queue)
+  end
+
+  def erl_dequeue(queue) do
+    :queue.out(queue)
+  end
 end
