@@ -6,8 +6,8 @@ defmodule Algorithms.Queue do
   def empty?([]), do: true
   def empty?(_), do: false
 
-  def pop_rest([h | t]), do: {h, t}
-  def popped([h | _t]), do: h
+  def dequeue([h | t]), do: {h, t}
+  def dequeued([h | _t]), do: h
 
-  def push(queue, element), do: queue ++ [element]
+  def enqueue(queue, element), do: queue ++ [element]
 end
