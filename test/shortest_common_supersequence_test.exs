@@ -21,5 +21,11 @@ defmodule ShortestCommonSupersequenceTest do
              "Jewealous",
              "Jewaelous"
            ]
+
+    assert ShortestCommonSupersequence.shortest_common_supersequence(s3, s4) in [
+             "Parolka",
+             "Polarka",
+             "Poalrka"
+           ]
   end
 end

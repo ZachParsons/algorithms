@@ -47,33 +47,14 @@ defmodule ShortestCommonSupersequence do
 
   # Add new implementation below:
   def shortest_common_supersequence(str1, str2) do
-    str1_length = String.length(str1)
-    str2_length = String.length(str2)
+    # Convert strings to character lists
+    chars1 = String.graphemes(str1)
+    chars2 = String.graphemes(str2)
 
-    # Create a 2D matrix to store the lengths of the longest common subsequences
-    dp_matrix = for _ <- 0..str1_length, do: List.duplicate(0, str2_length + 1)
-
-    # Build the matrix with the lengths of the longest common subsequences
-    dp_matrix =
-      Enum.reduce(1..str1_length, dp_matrix, fn i, matrix ->
-        Enum.reduce(1..str2_length, matrix, fn j, acc ->
-          updated_value =
-            if String.at(str1, i - 1) == String.at(str2, j - 1) do
-              matrix_get(acc, i - 1, j - 1) + 1
-            else
-              max(matrix_get(acc, i - 1, j), matrix_get(acc, i, j - 1))
-            end
-
-          List.update_at(acc, i, fn row -> List.replace_at(row, j, updated_value) end)
-        end)
-      end)
-
-    # Backtrack through the matrix to find the shortest common supersequence
-    {supersequence, _, _} = backtrack(dp_matrix, str1, str2, str1_length, str2_length, [])
-
-    # Reverse the list and join it to form the final supersequence string
-    # |> String.reverse()
-    supersequence |> Enum.join()
+    # Solve using the same recursive approach as run/2
+    compare([], chars1, chars2)
+    |> Enum.reverse()
+    |> Enum.join()
   end
 
   # Helper function to get value from 2D matrix at position [i, j]
@@ -104,6 +85,7 @@ defmodule ShortestCommonSupersequence do
         backtrack(dp_matrix, str1, str2, i, j - 1, [char | acc])
 
       true ->
+        # When characters match, add only once but decrement both indices
         char = String.at(str1, i - 1)
         backtrack(dp_matrix, str1, str2, i - 1, j - 1, [char | acc])
     end
