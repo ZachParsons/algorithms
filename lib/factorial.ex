@@ -1,4 +1,5 @@
 defmodule Algorithms.Factorial do
+  @moduledoc false
   # Enumeration reduce
   def run(0), do: 1
 

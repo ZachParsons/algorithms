@@ -1,4 +1,6 @@
 defmodule Algorithms.BinarySearchTree do
+  @moduledoc false
+
   # TODO:
   # 1. traverse
   # 2. insert
@@ -20,6 +22,14 @@ defmodule Algorithms.BinarySearchTree do
   #     end
   #   end
   # end
+
+  defmodule Node do
+    @moduledoc false
+
+    defstruct value: nil,
+              left: nil,
+              right: nil
+  end
 
   def find(value, %{value: n_value} = node) when n_value == value, do: node
   def find(_value, %{left: left, right: right}) when left == nil and right == nil, do: :not_found

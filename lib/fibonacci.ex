@@ -1,4 +1,5 @@
 defmodule Algorithms.Fibonacci do
+  @moduledoc false
   def run(0), do: 1
   def run(1), do: 1
 

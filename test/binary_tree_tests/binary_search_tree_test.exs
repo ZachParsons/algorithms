@@ -1,7 +1,7 @@
 defmodule Algorithms.BinarySearchTreeTest do
   use ExUnit.Case
   alias Algorithms.BinarySearchTree
-  alias Algorithms.BinaryTree.Node
+  alias Algorithms.BinarySearchTree.Node
 
   describe "find/2" do
     setup do

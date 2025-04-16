@@ -1,4 +1,6 @@
 defmodule Algorithms.FizzBuzz do
+  @moduledoc false
+
   def run(n) when not is_integer(n) or n <= 0, do: "Invalid input"
 
   def run(n) when rem(n, 15) == 0, do: "FizzBuzz"

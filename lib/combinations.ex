@@ -1,4 +1,5 @@
 defmodule Algorithms.Combinations do
+  @moduledoc false
   def run(elements, size)
       when is_list(elements) and
              is_integer(size) and

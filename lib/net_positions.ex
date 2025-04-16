@@ -30,6 +30,7 @@
 
 # TODO store monetary values as integers * 10
 defmodule NetPosition do
+  @moduledoc false
   defstruct net_gold: nil,
             net_USD: nil
 
@@ -39,6 +40,8 @@ defmodule NetPosition do
         }
 
   defmodule Trade do
+    @moduledoc false
+
     defstruct id: nil,
               type: nil,
               total_gold: nil,
