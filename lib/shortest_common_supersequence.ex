@@ -15,6 +15,7 @@ defmodule ShortestCommonSupersequence do
   """
 
   defmodule Naive do
+    @moduledoc false
     def run(s1, s2) do
       chars1 = String.graphemes(s1)
       chars2 = String.graphemes(s2)
@@ -59,9 +60,10 @@ defmodule ShortestCommonSupersequence do
   end
 
   #######################
-  defmodule Dynamic do
-    @spec shortest_common_supersequence(str1 :: String.t(), str2 :: String.t()) :: String.t()
-    def shortest_common_supersequence(str1, str2) do
+  defmodule DP do
+    @moduledoc false
+    @spec run(str1 :: String.t(), str2 :: String.t()) :: String.t()
+    def run(str1, str2) do
       bfs(
         :queue.from_list([{0, 0, []}]),
         MapSet.new(),
