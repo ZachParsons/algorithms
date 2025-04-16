@@ -14,80 +14,94 @@ defmodule ShortestCommonSupersequence do
   C: Parolka, Polarka, Poalrka... (any of)
   """
 
-  def run(s1, s2) do
-    chars1 = String.graphemes(s1)
-    chars2 = String.graphemes(s2)
+  defmodule Naive do
+    def run(s1, s2) do
+      chars1 = String.graphemes(s1)
+      chars2 = String.graphemes(s2)
 
-    compare([], chars1, chars2)
-    |> Enum.reverse()
-    |> Enum.join()
+      compare([], chars1, chars2)
+      |> Enum.reverse()
+      |> Enum.join()
+    end
+
+    # When all lists are empty - base case.
+    def compare([], [], []), do: []
+
+    # When acc empty & both lists start with same char.
+    def compare([], [a | t2], [a | t3]), do: compare([a], t2, t3)
+    # When acc empty & lists start with different chars.
+    def compare([], [h2 | t2], [h3 | t3]), do: compare([h2, h3], t2, t3)
+
+    # When both inputs are emptied.
+    def compare(acc, [], []), do: acc
+
+    # When one or the other input is empty.
+    def compare(acc, [], [h3 | t3]), do: compare([h3 | acc], [], t3)
+    def compare(acc = [a | _t1], [], [a | t3]), do: compare(acc, [], t3)
+
+    # When third list empty & both acc & second list start with same char.
+    def compare(acc = [a | _t1], [a | t2], []), do: compare(acc, t2, [])
+    # When third list empty & second list non-empty.
+    def compare(acc, [h2 | t2], []), do: compare([h2 | acc], t2, [])
+
+    # When all lists non-empty & second & third lists start with same char.
+    def compare(acc, [a | t2], [a | t3]), do: compare([a | acc], t2, t3)
+
+    # When all lists start with same char.
+    def compare(acc = [a | _t1], [a | t2], [a | t3]), do: compare(acc, t2, t3)
+    # When acc & second list start with same char.
+    def compare(acc = [a | _t1], [a | t2], chars2), do: compare(acc, t2, chars2)
+    # When acc & third list start with same char.
+    def compare(acc = [a | _t1], chars1, [a | t3]), do: compare(acc, chars1, t3)
+
+    # When no other patterns match - most general case.
+    def compare(acc, [h2 | t2], [h3 | t3]), do: compare([h2, h3 | acc], t2, t3)
   end
 
-  def compare([], [], []), do: []
+  #######################
+  defmodule Dynamic do
+    @spec shortest_common_supersequence(str1 :: String.t(), str2 :: String.t()) :: String.t()
+    def shortest_common_supersequence(str1, str2) do
+      bfs(
+        :queue.from_list([{0, 0, []}]),
+        MapSet.new(),
+        str1,
+        str2
+      )
+    end
 
-  def compare([], [a | t2], [a | t3]), do: compare([a], t2, t3)
-  def compare([], [h2 | t2], [h3 | t3]), do: compare([h2, h3], t2, t3)
-  def compare(acc, [], []), do: acc
+    defp bfs(queue, seen, str1, str2) do
+      {{:value, {i, j, acc}}, queue} = :queue.out(queue)
 
-  def compare(acc, [], [h3 | t3]), do: compare([h3 | acc], [], t3)
-  def compare(acc = [a | _t1], [], [a | t3]), do: compare(acc, [], t3)
+      if MapSet.member?(seen, {i, j}) do
+        bfs(queue, seen, str1, str2)
+      else
+        seen = MapSet.put(seen, {i, j})
 
-  def compare(acc = [a | _t1], [a | t2], []), do: compare(acc, t2, [])
-  def compare(acc, [h2 | t2], []), do: compare([h2 | acc], t2, [])
+        cond do
+          i == byte_size(str1) and j == byte_size(str2) ->
+            acc
+            |> Enum.reverse()
+            |> List.to_string()
 
-  # Non-empties.
-  def compare(acc, [a | t2], [a | t3]), do: compare([a | acc], t2, t3)
+          i == byte_size(str1) ->
+            queue = :queue.in({i, j + 1, [:binary.at(str2, j) | acc]}, queue)
+            bfs(queue, seen, str1, str2)
 
-  def compare(acc = [a | _t1], [a | t2], [a | t3]), do: compare(acc, t2, t3)
-  def compare(acc = [a | _t1], [a | t2], chars2), do: compare(acc, t2, chars2)
-  def compare(acc = [a | _t1], chars1, [a | t3]), do: compare(acc, chars1, t3)
+          j == byte_size(str2) ->
+            queue = :queue.in({i + 1, j, [:binary.at(str1, i) | acc]}, queue)
+            bfs(queue, seen, str1, str2)
 
-  # Most unique case.
-  def compare(acc, [h2 | t2], [h3 | t3]), do: compare([h2, h3 | acc], t2, t3)
+          :binary.at(str1, i) == :binary.at(str2, j) ->
+            queue = :queue.in({i + 1, j + 1, [:binary.at(str1, i) | acc]}, queue)
+            bfs(queue, seen, str1, str2)
 
-  # Add new implementation below:
-  def shortest_common_supersequence(str1, str2) do
-    # Convert strings to character lists
-    chars1 = String.graphemes(str1)
-    chars2 = String.graphemes(str2)
-
-    # Solve using the same recursive approach as run/2
-    compare([], chars1, chars2)
-    |> Enum.reverse()
-    |> Enum.join()
-  end
-
-  # Helper function to get value from 2D matrix at position [i, j]
-  defp matrix_get(matrix, i, j) do
-    matrix |> Enum.at(i) |> Enum.at(j)
-  end
-
-  defp backtrack(_dp_matrix, _str1, _str2, 0, 0, acc), do: {acc, 0, 0}
-
-  defp backtrack(dp_matrix, str1, str2, 0, j, acc) do
-    char = String.at(str2, j - 1)
-    backtrack(dp_matrix, str1, str2, 0, j - 1, [char | acc])
-  end
-
-  defp backtrack(dp_matrix, str1, str2, i, 0, acc) do
-    char = String.at(str1, i - 1)
-    backtrack(dp_matrix, str1, str2, i - 1, 0, [char | acc])
-  end
-
-  defp backtrack(dp_matrix, str1, str2, i, j, acc) do
-    cond do
-      matrix_get(dp_matrix, i, j) == matrix_get(dp_matrix, i - 1, j) ->
-        char = String.at(str1, i - 1)
-        backtrack(dp_matrix, str1, str2, i - 1, j, [char | acc])
-
-      matrix_get(dp_matrix, i, j) == matrix_get(dp_matrix, i, j - 1) ->
-        char = String.at(str2, j - 1)
-        backtrack(dp_matrix, str1, str2, i, j - 1, [char | acc])
-
-      true ->
-        # When characters match, add only once but decrement both indices
-        char = String.at(str1, i - 1)
-        backtrack(dp_matrix, str1, str2, i - 1, j - 1, [char | acc])
+          true ->
+            queue = :queue.in({i + 1, j, [:binary.at(str1, i) | acc]}, queue)
+            queue = :queue.in({i, j + 1, [:binary.at(str2, j) | acc]}, queue)
+            bfs(queue, seen, str1, str2)
+        end
+      end
     end
   end
 end
