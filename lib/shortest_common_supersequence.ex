@@ -87,20 +87,20 @@ defmodule ShortestCommonSupersequence do
             |> List.to_string()
 
           i == byte_size(str1) ->
-            queue = :queue.in({i, j + 1, [:binary.at(str2, j) | acc]}, queue)
+            queue = :queue.in({i, j + 1, [String.at(str2, j) | acc]}, queue)
             bfs(queue, seen, str1, str2)
 
           j == byte_size(str2) ->
-            queue = :queue.in({i + 1, j, [:binary.at(str1, i) | acc]}, queue)
+            queue = :queue.in({i + 1, j, [String.at(str1, i) | acc]}, queue)
             bfs(queue, seen, str1, str2)
 
-          :binary.at(str1, i) == :binary.at(str2, j) ->
-            queue = :queue.in({i + 1, j + 1, [:binary.at(str1, i) | acc]}, queue)
+          String.at(str1, i) == String.at(str2, j) ->
+            queue = :queue.in({i + 1, j + 1, [String.at(str1, i) | acc]}, queue)
             bfs(queue, seen, str1, str2)
 
           true ->
-            queue = :queue.in({i + 1, j, [:binary.at(str1, i) | acc]}, queue)
-            queue = :queue.in({i, j + 1, [:binary.at(str2, j) | acc]}, queue)
+            queue = :queue.in({i + 1, j, [String.at(str1, i) | acc]}, queue)
+            queue = :queue.in({i, j + 1, [String.at(str2, j) | acc]}, queue)
             bfs(queue, seen, str1, str2)
         end
       end
