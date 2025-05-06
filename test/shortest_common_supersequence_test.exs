@@ -1,6 +1,21 @@
 defmodule ShortestCommonSupersequenceTest do
   use ExUnit.Case
 
+  @moduledoc """
+  This is the code challenge prompt:
+  ```
+  Given two strings A and B, find the smallest string C that contains both A and B. The characters of A and B have to appear in order, but not contiguously, within C.
+
+
+  A: Jealous
+  B: Jewel
+  C: Jeawelous, Jewealous, Jewaelous (any of)
+
+  A: Park
+  B: Polka
+  C: Parolka, Polarka, Poalrka... (any of)
+  """
+
   setup do
     %{
       case1: [["Jealous", "Jewel"], ["Jeawelous", "Jewealous", "Jewaelous"]],
