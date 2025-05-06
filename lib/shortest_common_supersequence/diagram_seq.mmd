@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant Client
+    participant DP
+    participant Queue
+    participant SeenSet
+    participant BFS
+
+    Client->>DP: run("str1", "str2")
+    Note over DP: Initialize state<br/>{i: 0, j: 0, acc: []}
+    
+    DP->>Queue: Create queue with initial state
+    DP->>SeenSet: Create empty MapSet
+    DP->>BFS: breadth_first_search(queue, seen, str1, str2)
+    
+    loop Until solution found
+        BFS->>Queue: Dequeue state (i,j,acc)
+        BFS->>SeenSet: Check if (i,j) seen
+        
+        alt State already seen
+            BFS->>BFS: Skip & continue to next state
+        else State not seen
+            BFS->>SeenSet: Add (i,j) to seen
+            
+            alt i == len(str1) && j == len(str2)
+                BFS-->>Client: Return reversed & joined acc
+            else i == len(str1)
+                BFS->>Queue: Add state (i, j+1, [str2[j] | acc])
+            else j == len(str2)
+                BFS->>Queue: Add state (i+1, j, [str1[i] | acc])
+            else str1[i] == str2[j]
+                BFS->>Queue: Add state (i+1, j+1, [str1[i] | acc])
+            else Different chars
+                BFS->>Queue: Add state (i+1, j, [str1[i] | acc])
+                BFS->>Queue: Add state (i, j+1, [str2[j] | acc])
+            end
+        end
+    end
