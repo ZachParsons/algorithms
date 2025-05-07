@@ -22,3 +22,17 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 algorithms-*.tar
 
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn
+
+# ESLint
+.eslintcache
+
+# Prettier
+.prettier.cache
+
