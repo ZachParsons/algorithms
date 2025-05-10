@@ -31,8 +31,8 @@ defmodule ShortestCommonSupersequenceTest do
   } do
     assert ShortestCommonSupersequence.Naive.run(i1, i2) in output1
     assert ShortestCommonSupersequence.Naive.run(i3, i4) in output2
-    assert ShortestCommonSupersequence.DP.run(i1, i2) in output1
-    assert ShortestCommonSupersequence.DP.run(i3, i4) in output2
-    assert ShortestCommonSupersequence.DP.run(i5, i6) in output3
+    assert ShortestCommonSupersequence.DPSet.run(i1, i2) in output1
+    assert ShortestCommonSupersequence.DPSet.run(i3, i4) in output2
+    assert ShortestCommonSupersequence.DPSet.run(i5, i6) in output3
   end
 end
