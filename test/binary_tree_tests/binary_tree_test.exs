@@ -1,7 +1,7 @@
-defmodule Algorithms.BinarySearchTreeTest do
+defmodule Algorithms.BinaryTreeTest do
   use ExUnit.Case
-  alias Algorithms.BinarySearchTree
-  alias Algorithms.BinarySearchTree.Node
+  alias Algorithms.BinaryTree
+  alias Algorithms.BinaryTree.Node
 
   describe "find/2" do
     setup do
@@ -39,11 +39,31 @@ defmodule Algorithms.BinarySearchTreeTest do
                  value: 7
                },
                right: nil
-             } == BinarySearchTree.find(9, tree)
+             } == BinaryTree.find(9, tree)
     end
 
     test "Not found", %{tree: tree} do
-      assert :not_found == BinarySearchTree.find(2, tree)
+      assert :not_found == BinaryTree.find(2, tree)
+    end
+  end
+
+  describe "postorder_traversal/1" do
+    test "traverses complex tree" do
+      tree = %Node{
+        value: 8,
+        left: %Node{
+          value: 4,
+          left: %Node{value: 2, left: nil, right: nil},
+          right: %Node{value: 6, left: nil, right: nil}
+        },
+        right: %Node{
+          value: 12,
+          left: %Node{value: 10, left: nil, right: nil},
+          right: %Node{value: 14, left: nil, right: nil}
+        }
+      }
+
+      assert [2, 6, 4, 10, 14, 12, 8] == BinaryTree.postorder_traversal(tree)
     end
   end
 end
