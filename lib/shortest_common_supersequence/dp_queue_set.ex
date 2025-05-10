@@ -1,4 +1,4 @@
-defmodule ShortestCommonSupersequence.DPSet do
+defmodule ShortestCommonSupersequence.DPQueueSet do
   @moduledoc """
   Dynamic Programming Solution (Using BFS) Pseudocode:
   1. Initialize:
