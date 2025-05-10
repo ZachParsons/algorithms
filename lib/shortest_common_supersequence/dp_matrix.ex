@@ -12,84 +12,121 @@ defmodule ShortestCommonSupersequence.DPMatrix do
 
   @spec run(s1 :: String.t(), s2 :: String.t()) :: String.t()
   def run(s1, s2) do
-    # Get the lengths of both strings
-    m = String.length(s1)
-    n = String.length(s2)
-
-    # Step 1: Create and fill the DP matrix for LCS
-    dp = build_dp_matrix(s1, s2, m, n)
-
-    # Step 2: Construct the shortest common supersequence from the DP matrix
-    construct_supersequence(dp, s1, s2, m, n)
+    s1 |> build_dp_matrix(s2) |> construct_supersequence(s1, s2)
   end
 
   # Builds the DP matrix for finding the longest common subsequence
-  defp build_dp_matrix(s1, s2, m, n) do
-    # Initialize matrix with zeros
-    dp = for _ <- 0..m, do: List.duplicate(0, n + 1)
+  @spec build_dp_matrix(s1 :: String.t(), s2 :: String.t()) :: list(list(integer()))
+  defp build_dp_matrix(s1, s2) do
+    m = String.length(s1)
+    n = String.length(s2)
 
-    # Fill the dp matrix
-    dp =
-      Enum.reduce(1..m, dp, fn i, dp ->
-        Enum.reduce(1..n, dp, fn j, dp ->
-          dp_row = Enum.at(dp, i)
+    # Convert strings to character lists for O(1) access
+    s1_chars = String.to_charlist(s1)
+    s2_chars = String.to_charlist(s2)
 
-          # Check if characters match
-          new_value =
-            if String.at(s1, i - 1) == String.at(s2, j - 1) do
-              1 + get_matrix_value(dp, i - 1, j - 1)
-            else
-              max(get_matrix_value(dp, i - 1, j), get_matrix_value(dp, i, j - 1))
-            end
+    # Initialize empty matrix of size (m+1) x (n+1)
+    matrix = for _ <- 0..m, do: List.duplicate(0, n + 1)
 
-          # Update the dp matrix
-          List.replace_at(dp, i, List.replace_at(dp_row, j, new_value))
-        end)
-      end)
-
-    dp
+    # Fill matrix using recursion with accumulator
+    fill_matrix(matrix, s1_chars, s2_chars, m, n)
   end
 
-  # Helper function to get value from matrix at position (i, j)
-  defp get_matrix_value(matrix, i, j) do
-    matrix |> Enum.at(i) |> Enum.at(j)
+  # Base case: matrix is filled
+  defp fill_matrix(matrix, _s1, _s2, 0, 0), do: matrix
+
+  # Recursive case: fill matrix row by row, column by column
+  defp fill_matrix(matrix, s1, s2, m, n) do
+    indices = for i <- 1..m, j <- 1..n, do: {i, j}
+
+    Enum.reduce(indices, matrix, fn {i, j}, acc ->
+      # Current character in each string (0-indexed)
+      char1 = Enum.at(s1, i - 1)
+      char2 = Enum.at(s2, j - 1)
+
+      new_value =
+        if char1 == char2 do
+          # Characters match - increment diagonal value
+          1 + get_value(acc, i - 1, j - 1)
+        else
+          # Characters don't match - take max of left and top
+          max(get_value(acc, i - 1, j), get_value(acc, i, j - 1))
+        end
+
+      # Update matrix at position (i, j)
+      update_matrix(acc, i, j, new_value)
+    end)
+  end
+
+  # Get value from matrix at position (i, j)
+  defp get_value(matrix, i, j), do: matrix |> Enum.at(i) |> Enum.at(j)
+
+  # Update matrix at position (i, j) with new value
+  defp update_matrix(matrix, i, j, value) do
+    matrix
+    |> Enum.with_index()
+    |> Enum.map(fn {row, row_idx} ->
+      if row_idx == i do
+        row
+        |> Enum.with_index()
+        |> Enum.map(fn {cell, col_idx} ->
+          if col_idx == j, do: value, else: cell
+        end)
+      else
+        row
+      end
+    end)
   end
 
   # Construct the shortest common supersequence using the DP matrix
-  defp construct_supersequence(dp, s1, s2, m, n) do
-    # Start from the bottom right of the dp matrix
-    {result, _, _} =
-      build_result(dp, s1, s2, m, n, [])
+  @spec construct_supersequence(
+          matrix :: list(list(integer())),
+          s1 :: String.t(),
+          s2 :: String.t()
+        ) :: String.t()
+  defp construct_supersequence(matrix, s1, s2) do
+    m = String.length(s1)
+    n = String.length(s2)
 
-    # Convert the result list to a string
-    result
-    |> List.to_string()
+    # Convert strings to character lists for O(1) access
+    s1_chars = String.to_charlist(s1)
+    s2_chars = String.to_charlist(s2)
+
+    # Start backtracking from bottom-right corner of matrix
+    backtrack(matrix, s1_chars, s2_chars, m, n, [])
+    |> to_string()
   end
 
-  # Build the result by backtracking through the DP matrix
-  defp build_result(_dp, s1, s2, i, j, result) when i == 0 and j == 0, do: {result, i, j}
+  # Backtracking: Base case, reached top-left corner
+  defp backtrack(_matrix, _s1, _s2, 0, 0, acc), do: acc
 
-  defp build_result(dp, s1, s2, i, j, result) do
+  # Backtracking: No more characters in first string
+  defp backtrack(matrix, s1, s2, 0, j, acc) do
+    backtrack(matrix, s1, s2, 0, j - 1, [Enum.at(s2, j - 1) | acc])
+  end
+
+  # Backtracking: No more characters in second string
+  defp backtrack(matrix, s1, s2, i, 0, acc) do
+    backtrack(matrix, s1, s2, i - 1, 0, [Enum.at(s1, i - 1) | acc])
+  end
+
+  # Backtracking: Main recursive function
+  defp backtrack(matrix, s1, s2, i, j, acc) do
+    char1 = Enum.at(s1, i - 1)
+    char2 = Enum.at(s2, j - 1)
+
     cond do
-      # If we've used all characters from s1, take remaining from s2
-      i == 0 ->
-        build_result(dp, s1, s2, i, j - 1, [String.at(s2, j - 1) | result])
+      # Characters match - take one character and move diagonally
+      char1 == char2 ->
+        backtrack(matrix, s1, s2, i - 1, j - 1, [char1 | acc])
 
-      # If we've used all characters from s2, take remaining from s1
-      j == 0 ->
-        build_result(dp, s1, s2, i - 1, j, [String.at(s1, i - 1) | result])
+      # Take from first string if it leads to longer LCS
+      get_value(matrix, i - 1, j) > get_value(matrix, i, j - 1) ->
+        backtrack(matrix, s1, s2, i - 1, j, [char1 | acc])
 
-      # If characters match, add once and move diagonally
-      String.at(s1, i - 1) == String.at(s2, j - 1) ->
-        build_result(dp, s1, s2, i - 1, j - 1, [String.at(s1, i - 1) | result])
-
-      # If characters don't match, take from the direction that has greater LCS value
-      get_matrix_value(dp, i - 1, j) > get_matrix_value(dp, i, j - 1) ->
-        build_result(dp, s1, s2, i - 1, j, [String.at(s1, i - 1) | result])
-
-      # Otherwise take from s2
+      # Otherwise take from second string
       true ->
-        build_result(dp, s1, s2, i, j - 1, [String.at(s2, j - 1) | result])
+        backtrack(matrix, s1, s2, i, j - 1, [char2 | acc])
     end
   end
 end
