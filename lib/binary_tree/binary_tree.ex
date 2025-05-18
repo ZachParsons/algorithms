@@ -2,7 +2,7 @@ defmodule Algorithms.BinaryTree do
   @moduledoc false
 
   # TODO:
-  # [x] 1. list || traverse
+  # [x] 1. list || traverse.
   # [x] 2. get || find.
   # [ ] 3. insert || create.
   # [ ] 4. update || move subtree.
@@ -17,6 +17,23 @@ defmodule Algorithms.BinaryTree do
   end
 
   # 1. List || traversal.
+  # The difference between traversal and list: Traversal is about the process of visiting nodes, while listing is about the final arrangement of elements. In many implementations, they're combined because we often want both the traversal order and the resulting list.
+
+  # The breadth-first and depth-first functions differ significantly because they use fundamentally different approaches to traverse the tree:
+  #   The key differences are:
+  #   State Management:
+  #     DFS: Uses implicit state through recursion
+  #     BFS: Uses explicit state through queue
+  #   Memory Structure:
+  #     DFS: Stack-based (LIFO - Last In, First Out)
+  #     BFS: Queue-based (FIFO - First In, First Out)
+  #   Implementation Complexity:
+  #     DFS: Simpler to implement due to natural recursion
+  #     BFS: More complex due to need for explicit queue management
+  #   Memory Usage Pattern:
+  #     DFS: Memory usage depends on tree height
+  #     BFS: Memory usage depends on tree width
+
   # Preorder traversal (top -> bottom, left -> right)
   def depth_first_preorder(nil), do: []
 
