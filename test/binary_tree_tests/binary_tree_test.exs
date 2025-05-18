@@ -3,8 +3,8 @@ defmodule Algorithms.BinaryTreeTest do
   alias Algorithms.BinaryTree
   alias Algorithms.BinaryTree.Node
 
-  describe "preorder_traversal/1" do
-    test "traverses three-level tree" do
+  describe "depth_first_preorder/1" do
+    test "traverses depth-2 (three level) tree" do
       tree = %Node{
         value: 8,
         left: %Node{
@@ -19,12 +19,12 @@ defmodule Algorithms.BinaryTreeTest do
         }
       }
 
-      assert [8, 4, 2, 6, 12, 10, 14] == BinaryTree.preorder_traversal(tree)
+      assert [8, 4, 2, 6, 12, 10, 14] == BinaryTree.depth_first_preorder(tree)
     end
   end
 
-  describe "inorder_traversal/1" do
-    test "traverses three-level tree" do
+  describe "depth_first_inorder/1" do
+    test "traverses depth-2 (three level) tree" do
       tree = %Node{
         value: 8,
         left: %Node{
@@ -39,12 +39,12 @@ defmodule Algorithms.BinaryTreeTest do
         }
       }
 
-      assert [2, 4, 6, 8, 10, 12, 14] == BinaryTree.inorder_traversal(tree)
+      assert [2, 4, 6, 8, 10, 12, 14] == BinaryTree.depth_first_inorder(tree)
     end
   end
 
-  describe "postorder_traversal/1" do
-    test "traverses complex tree" do
+  describe "depth_first_postorder/1" do
+    test "traverses depth-2 (three level) tree" do
       tree = %Node{
         value: 8,
         left: %Node{
@@ -59,12 +59,12 @@ defmodule Algorithms.BinaryTreeTest do
         }
       }
 
-      assert [2, 6, 4, 10, 14, 12, 8] == BinaryTree.postorder_traversal(tree)
+      assert [2, 6, 4, 10, 14, 12, 8] == BinaryTree.depth_first_postorder(tree)
     end
   end
 
-  describe "breadth_first_traversal/1" do
-    test "traverses three-level tree" do
+  describe "breadth_first/1" do
+    test "traverses depth-2 (three level) tree" do
       tree = %Node{
         value: 8,
         left: %Node{
@@ -79,7 +79,7 @@ defmodule Algorithms.BinaryTreeTest do
         }
       }
 
-      assert [8, 4, 12, 2, 6, 10, 14] == BinaryTree.breadth_first_traversal(tree)
+      assert [8, 4, 12, 2, 6, 10, 14] == BinaryTree.breadth_first(tree)
     end
   end
 
