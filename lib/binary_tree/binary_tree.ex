@@ -25,6 +25,13 @@ defmodule Algorithms.BinaryTree do
     [value] ++ preorder_traversal(left) ++ preorder_traversal(right)
   end
 
+  # Inorder traversal (left -> root -> right)
+  def inorder_traversal(nil), do: []
+
+  def inorder_traversal(%Node{value: value, left: left, right: right}) do
+    inorder_traversal(left) ++ [value] ++ inorder_traversal(right)
+  end
+
   # Postorder traversal (bottom -> top, left -> right)
   def postorder_traversal(nil), do: []
 

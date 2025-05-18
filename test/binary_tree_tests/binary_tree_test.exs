@@ -23,6 +23,26 @@ defmodule Algorithms.BinaryTreeTest do
     end
   end
 
+  describe "inorder_traversal/1" do
+    test "traverses three-level tree" do
+      tree = %Node{
+        value: 8,
+        left: %Node{
+          value: 4,
+          left: %Node{value: 2, left: nil, right: nil},
+          right: %Node{value: 6, left: nil, right: nil}
+        },
+        right: %Node{
+          value: 12,
+          left: %Node{value: 10, left: nil, right: nil},
+          right: %Node{value: 14, left: nil, right: nil}
+        }
+      }
+
+      assert [2, 4, 6, 8, 10, 12, 14] == BinaryTree.inorder_traversal(tree)
+    end
+  end
+
   describe "postorder_traversal/1" do
     test "traverses complex tree" do
       tree = %Node{
