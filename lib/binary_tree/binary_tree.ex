@@ -17,7 +17,6 @@ defmodule Algorithms.BinaryTree do
   end
 
   # 1. List || traversal.
-
   # Preorder traversal (top -> bottom, left -> right)
   def preorder_traversal(nil), do: []
 
@@ -37,6 +36,20 @@ defmodule Algorithms.BinaryTree do
 
   def postorder_traversal(%Node{value: value, left: left, right: right}) do
     postorder_traversal(left) ++ postorder_traversal(right) ++ [value]
+  end
+
+  # Breadth-first traversal (left -> right, top -> bottom level by level)
+  def breadth_first_traversal(nil), do: []
+
+  def breadth_first_traversal(root) do
+    breadth_first_traversal([root], [])
+  end
+
+  defp breadth_first_traversal([], result), do: Enum.reverse(result)
+  defp breadth_first_traversal([nil | rest], result), do: breadth_first_traversal(rest, result)
+
+  defp breadth_first_traversal([%Node{value: value, left: left, right: right} | rest], result) do
+    breadth_first_traversal(rest ++ [left, right], [value | result])
   end
 
   # 2. Get || find.

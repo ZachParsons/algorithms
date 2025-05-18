@@ -63,6 +63,26 @@ defmodule Algorithms.BinaryTreeTest do
     end
   end
 
+  describe "breadth_first_traversal/1" do
+    test "traverses three-level tree" do
+      tree = %Node{
+        value: 8,
+        left: %Node{
+          value: 4,
+          left: %Node{value: 2, left: nil, right: nil},
+          right: %Node{value: 6, left: nil, right: nil}
+        },
+        right: %Node{
+          value: 12,
+          left: %Node{value: 10, left: nil, right: nil},
+          right: %Node{value: 14, left: nil, right: nil}
+        }
+      }
+
+      assert [8, 4, 12, 2, 6, 10, 14] == BinaryTree.breadth_first_traversal(tree)
+    end
+  end
+
   describe "find/2" do
     setup do
       [
