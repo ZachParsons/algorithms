@@ -8,22 +8,6 @@ defmodule Algorithms.BinaryTree do
   # 4. update || move subtree.
   # 5. delete subtree.
 
-  # def find(value, node) do
-  #   if node.value == value do
-  #     node
-  #   else
-  #     if node.left == nil && node.right == nil do
-  #       :not_found
-  #     else
-  #       if value < node.value do
-  #         find(value, node.left)
-  #       else
-  #         find(value, node.right)
-  #       end
-  #     end
-  #   end
-  # end
-
   defmodule Node do
     @moduledoc false
 
@@ -32,7 +16,16 @@ defmodule Algorithms.BinaryTree do
               right: nil
   end
 
-  # 1. List || traversal : postorder (left -> right -> root)
+  # 1. List || traversal.
+
+  # Preorder traversal (top -> bottom, left -> right)
+  def preorder_traversal(nil), do: []
+
+  def preorder_traversal(%Node{value: value, left: left, right: right}) do
+    [value] ++ preorder_traversal(left) ++ preorder_traversal(right)
+  end
+
+  # Postorder traversal (bottom -> top, left -> right)
   def postorder_traversal(nil), do: []
 
   def postorder_traversal(%Node{value: value, left: left, right: right}) do
