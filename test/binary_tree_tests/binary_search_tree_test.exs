@@ -1,7 +1,7 @@
-defmodule Algorithms.BinaryTreeTest do
+defmodule Algorithms.BinarySearchTreeTest do
   use ExUnit.Case
-  alias Algorithms.BinaryTree
-  alias Algorithms.BinaryTree.Node
+  alias Algorithms.BinarySearchTree
+  alias Algorithms.BinarySearchTree.Node
 
   describe "depth_first_preorder/1" do
     test "traverses depth-2 (three level) tree" do
@@ -19,7 +19,7 @@ defmodule Algorithms.BinaryTreeTest do
         }
       }
 
-      assert [8, 4, 2, 6, 12, 10, 14] == BinaryTree.depth_first_preorder(tree)
+      assert [8, 4, 2, 6, 12, 10, 14] == BinarySearchTree.depth_first_preorder(tree)
     end
   end
 
@@ -39,7 +39,7 @@ defmodule Algorithms.BinaryTreeTest do
         }
       }
 
-      assert [2, 4, 6, 8, 10, 12, 14] == BinaryTree.depth_first_inorder(tree)
+      assert [2, 4, 6, 8, 10, 12, 14] == BinarySearchTree.depth_first_inorder(tree)
     end
   end
 
@@ -59,7 +59,7 @@ defmodule Algorithms.BinaryTreeTest do
         }
       }
 
-      assert [2, 6, 4, 10, 14, 12, 8] == BinaryTree.depth_first_postorder(tree)
+      assert [2, 6, 4, 10, 14, 12, 8] == BinarySearchTree.depth_first_postorder(tree)
     end
   end
 
@@ -79,7 +79,7 @@ defmodule Algorithms.BinaryTreeTest do
         }
       }
 
-      assert [8, 4, 12, 2, 6, 10, 14] == BinaryTree.breadth_first(tree)
+      assert [8, 4, 12, 2, 6, 10, 14] == BinarySearchTree.breadth_first(tree)
     end
   end
 
@@ -111,11 +111,11 @@ defmodule Algorithms.BinaryTreeTest do
                  value: 7
                },
                right: nil
-             } == BinaryTree.find(9, tree)
+             } == BinarySearchTree.find(9, tree)
     end
 
     test "Not found", %{tree: tree} do
-      assert :not_found == BinaryTree.find(2, tree)
+      assert :not_found == BinarySearchTree.find(2, tree)
     end
   end
 end
