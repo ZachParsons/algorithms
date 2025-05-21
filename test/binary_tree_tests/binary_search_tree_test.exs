@@ -118,4 +118,44 @@ defmodule Algorithms.BinarySearchTreeTest do
       assert :not_found == BinarySearchTree.find(2, tree)
     end
   end
+
+  describe "insert/2" do
+    test "inserts into empty tree" do
+      assert %Node{value: 5, left: nil, right: nil} == BinarySearchTree.insert(5, nil)
+    end
+
+    test "inserts maintaining BST properties" do
+      # Start with a simple tree
+      tree = %Node{
+        value: 8,
+        left: %Node{value: 4, left: nil, right: nil},
+        right: %Node{value: 12, left: nil, right: nil}
+      }
+
+      # Insert values that should go to different positions
+      # Should go left of 4
+      tree = BinarySearchTree.insert(2, tree)
+      # Should go right of 4
+      tree = BinarySearchTree.insert(6, tree)
+      # Should go left of 12
+      tree = BinarySearchTree.insert(10, tree)
+      # Should go right of 12
+      tree = BinarySearchTree.insert(14, tree)
+
+      # Verify the structure through inorder traversal (should be sorted)
+      assert [2, 4, 6, 8, 10, 12, 14] == BinarySearchTree.depth_first_inorder(tree)
+    end
+
+    test "inserts equal values to the left" do
+      tree = %Node{value: 5, left: nil, right: nil}
+      # Equal value should go left
+      tree = BinarySearchTree.insert(5, tree)
+
+      assert %Node{
+               value: 5,
+               left: %Node{value: 5, left: nil, right: nil},
+               right: nil
+             } == tree
+    end
+  end
 end

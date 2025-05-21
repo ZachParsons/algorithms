@@ -6,7 +6,7 @@ defmodule Algorithms.BinarySearchTree do
   # TODO:
   # [x] 1. list || traverse.
   # [x] 2. get || find.
-  # [ ] 3. insert || create.
+  # [x] 3. insert || create.
   # [ ] 4. update || move subtree.
   # [ ] 5. delete subtree.
 
@@ -76,4 +76,15 @@ defmodule Algorithms.BinarySearchTree do
   def find(_value, %{left: left, right: right}) when left == nil and right == nil, do: :not_found
   def find(value, %{value: n_value, left: left}) when value < n_value, do: find(value, left)
   def find(value, %{right: right}), do: find(value, right)
+
+  # 3. Insert || create.
+  def insert(value, nil), do: %Node{value: value, left: nil, right: nil}
+
+  def insert(value, %Node{value: n_value} = node) when value <= n_value do
+    %{node | left: insert(value, node.left)}
+  end
+
+  def insert(value, %Node{value: n_value} = node) when value > n_value do
+    %{node | right: insert(value, node.right)}
+  end
 end
