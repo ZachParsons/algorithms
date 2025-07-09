@@ -8,7 +8,7 @@ defmodule Algorithms.BinarySearchTree do
   # [x] 2. get || find.
   # [x] 3. insert || create.
   # [x] 4. update || move subtree.
-  # [ ] 5. delete subtree.
+  # [x] 5. delete subtree.
 
   defmodule Node do
     @moduledoc false
@@ -217,5 +217,66 @@ defmodule Algorithms.BinarySearchTree do
     tree = insert(value, tree)
     tree = insert_subtree(left, tree)
     insert_subtree(right, tree)
+  end
+
+  # 5. Delete || remove.
+  @doc """
+  Deletes a node with the given value from the binary search tree.
+  Returns {:ok, updated_tree} if successful, {:error, :not_found} if value not found.
+
+  The deletion handles three cases:
+  1. Leaf node: Simply remove it
+  2. Node with one child: Replace with the child
+  3. Node with two children: Replace with the smallest value from the right subtree
+  """
+  def delete(value, tree) do
+    case delete_node(value, tree) do
+      {:ok, updated_tree} -> {:ok, updated_tree}
+      :not_found -> {:error, :not_found}
+    end
+  end
+
+  defp delete_node(_value, nil), do: :not_found
+
+  defp delete_node(value, %Node{value: node_value, left: left, right: right})
+       when value == node_value do
+    case {left, right} do
+      # Case 1: Leaf node - simply remove it
+      {nil, nil} ->
+        {:ok, nil}
+
+      # Case 2: Node with only right child
+      {nil, right} ->
+        {:ok, right}
+
+      # Case 2: Node with only left child
+      {left, nil} ->
+        {:ok, left}
+
+      # Case 3: Node with both children
+      {left, right} ->
+        # Find the smallest value in the right subtree (inorder successor)
+        smallest = find_smallest(right)
+        # Remove the smallest value from the right subtree
+        {:ok, new_right} = delete_node(smallest, right)
+        # Create new node with smallest value as root
+        {:ok, %Node{value: smallest, left: left, right: new_right}}
+    end
+  end
+
+  defp delete_node(value, %Node{value: node_value, left: left, right: _right} = node)
+       when value < node_value do
+    case delete_node(value, left) do
+      {:ok, new_left} -> {:ok, %{node | left: new_left}}
+      :not_found -> :not_found
+    end
+  end
+
+  defp delete_node(value, %Node{value: node_value, left: _left, right: right} = node)
+       when value > node_value do
+    case delete_node(value, right) do
+      {:ok, new_right} -> {:ok, %{node | right: new_right}}
+      :not_found -> :not_found
+    end
   end
 end
