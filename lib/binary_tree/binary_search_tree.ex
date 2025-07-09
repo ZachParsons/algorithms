@@ -7,7 +7,7 @@ defmodule Algorithms.BinarySearchTree do
   # [x] 1. list || traverse.
   # [x] 2. get || find.
   # [x] 3. insert || create.
-  # [ ] 4. update || move subtree.
+  # [x] 4. update || move subtree.
   # [ ] 5. delete subtree.
 
   defmodule Node do
@@ -86,5 +86,136 @@ defmodule Algorithms.BinarySearchTree do
 
   def insert(value, %Node{value: n_value} = node) when value > n_value do
     %{node | right: insert(value, node.right)}
+  end
+
+  # 4. Update || move subtree.
+  # Alternative implementation that maintains BST properties by removing and re-inserting
+  @doc """
+  Updates a node in the tree by removing the target node and inserting the new subtree
+  at the appropriate position to maintain BST properties. Orphaned children are re-inserted.
+  Returns {:ok, updated_tree} if successful, {:error, :not_found} if target not found.
+  """
+  def update(target_value, new_subtree, tree) do
+    case remove_node_and_get_children(target_value, tree) do
+      {:ok, tree_without_node, orphaned_children} ->
+        # Insert the new subtree at the appropriate position
+        updated_tree = insert_subtree(new_subtree, tree_without_node)
+        # Re-insert only unique values from orphaned children
+        final_tree = reinsert_unique_orphans(orphaned_children, updated_tree, new_subtree)
+        {:ok, final_tree}
+
+      :not_found ->
+        {:error, :not_found}
+    end
+  end
+
+  # Remove a node and return its orphaned children
+  defp remove_node_and_get_children(_target_value, nil), do: :not_found
+
+  defp remove_node_and_get_children(target_value, %Node{value: value, left: left, right: right})
+       when value == target_value do
+    # Found the target node, collect its children and remove it
+    orphaned_children = collect_children(left, right)
+
+    case {left, right} do
+      # Leaf node
+      {nil, nil} ->
+        {:ok, nil, orphaned_children}
+
+      # Only right child
+      {nil, right} ->
+        {:ok, right, orphaned_children}
+
+      # Only left child
+      {left, nil} ->
+        {:ok, left, orphaned_children}
+
+      {left, right} ->
+        # Node has both children, find the smallest value in right subtree
+        smallest = find_smallest(right)
+        # Remove the smallest value from right subtree
+        {:ok, new_right, _} = remove_node_and_get_children(smallest, right)
+        # Create new node with smallest value as root
+        {:ok, %Node{value: smallest, left: left, right: new_right}, orphaned_children}
+    end
+  end
+
+  defp remove_node_and_get_children(
+         target_value,
+         %Node{value: value, left: left, right: _right} = node
+       )
+       when target_value < value do
+    case remove_node_and_get_children(target_value, left) do
+      {:ok, new_left, orphaned_children} -> {:ok, %{node | left: new_left}, orphaned_children}
+      :not_found -> :not_found
+    end
+  end
+
+  defp remove_node_and_get_children(
+         target_value,
+         %Node{value: value, left: _left, right: right} = node
+       )
+       when target_value > value do
+    case remove_node_and_get_children(target_value, right) do
+      {:ok, new_right, orphaned_children} -> {:ok, %{node | right: new_right}, orphaned_children}
+      :not_found -> :not_found
+    end
+  end
+
+  # Collect all children from a subtree into a list of subtrees
+  defp collect_children(nil, nil), do: []
+  defp collect_children(left, nil), do: [left]
+  defp collect_children(nil, right), do: [right]
+  defp collect_children(left, right), do: [left, right]
+
+  # Helper to collect all values in a subtree as a MapSet
+  defp collect_value_set(nil), do: MapSet.new()
+
+  defp collect_value_set(%Node{value: value, left: left, right: right}) do
+    MapSet.put(MapSet.union(collect_value_set(left), collect_value_set(right)), value)
+  end
+
+  # Insert all unique values from orphaned subtrees that are not present in the updated tree
+  defp reinsert_unique_orphans(orphaned_subtrees, tree, _new_subtree) do
+    existing_values = collect_value_set(tree)
+    insert_orphaned_values(orphaned_subtrees, tree, existing_values)
+  end
+
+  defp insert_orphaned_values([], tree, _new_values), do: tree
+
+  defp insert_orphaned_values([nil | rest], tree, new_values),
+    do: insert_orphaned_values(rest, tree, new_values)
+
+  defp insert_orphaned_values([%Node{} = subtree | rest], tree, new_values) do
+    {tree, new_values} = insert_subtree_unique(subtree, tree, new_values)
+    insert_orphaned_values(rest, tree, new_values)
+  end
+
+  # Insert a subtree, but only values not already in new_values
+  defp insert_subtree_unique(nil, tree, new_values), do: {tree, new_values}
+
+  defp insert_subtree_unique(%Node{value: value, left: left, right: right}, tree, new_values) do
+    if MapSet.member?(new_values, value) do
+      # Skip duplicate
+      {tree, new_values}
+    else
+      tree = insert(value, tree)
+      new_values = MapSet.put(new_values, value)
+      {tree, new_values} = insert_subtree_unique(left, tree, new_values)
+      insert_subtree_unique(right, tree, new_values)
+    end
+  end
+
+  # Find the smallest value in a subtree
+  defp find_smallest(%Node{value: value, left: nil}), do: value
+  defp find_smallest(%Node{left: left}), do: find_smallest(left)
+
+  # Insert a subtree at the appropriate position to maintain BST properties
+  defp insert_subtree(nil, tree), do: tree
+
+  defp insert_subtree(%Node{value: value, left: left, right: right}, tree) do
+    tree = insert(value, tree)
+    tree = insert_subtree(left, tree)
+    insert_subtree(right, tree)
   end
 end
