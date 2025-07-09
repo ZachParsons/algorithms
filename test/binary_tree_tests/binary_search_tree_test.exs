@@ -63,7 +63,7 @@ defmodule Algorithms.BinarySearchTreeTest do
     end
   end
 
-  describe "breadth_first/1" do
+  describe "breadth_first_level_order/1" do
     test "traverses depth-2 (three level) tree" do
       tree = %Node{
         value: 8,
@@ -79,7 +79,7 @@ defmodule Algorithms.BinarySearchTreeTest do
         }
       }
 
-      assert [8, 4, 12, 2, 6, 10, 14] == BinarySearchTree.breadth_first(tree)
+      assert [8, 4, 12, 2, 6, 10, 14] == BinarySearchTree.breadth_first_level_order(tree)
     end
   end
 

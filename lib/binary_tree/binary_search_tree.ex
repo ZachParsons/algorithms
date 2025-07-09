@@ -58,17 +58,19 @@ defmodule Algorithms.BinarySearchTree do
   end
 
   # Breadth-first traversal (left -> right, top -> bottom level by level)
-  def breadth_first(nil), do: []
+  def breadth_first_level_order(nil), do: []
 
-  def breadth_first(root) do
-    breadth_first([root], [])
+  def breadth_first_level_order(root) do
+    breadth_first_level_order([root], [])
   end
 
-  defp breadth_first([], result), do: Enum.reverse(result)
-  defp breadth_first([nil | rest], result), do: breadth_first(rest, result)
+  defp breadth_first_level_order([], result), do: Enum.reverse(result)
 
-  defp breadth_first([%Node{value: value, left: left, right: right} | rest], result) do
-    breadth_first(rest ++ [left, right], [value | result])
+  defp breadth_first_level_order([nil | rest], result),
+    do: breadth_first_level_order(rest, result)
+
+  defp breadth_first_level_order([%Node{value: value, left: left, right: right} | rest], result) do
+    breadth_first_level_order(rest ++ [left, right], [value | result])
   end
 
   # 2. Get || find.
