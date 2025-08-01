@@ -1,0 +1,79 @@
+sequenceDiagram
+    participant Client
+    participant DPQueueSet as DPQueueSet.run/2
+    participant BFS as breadth_first_search/4
+    participant Queue as :queue
+    participant SeenSet as MapSet (seen_coords)
+
+    Client->>DPQueueSet: run(s1, s2)
+    Note over DPQueueSet: Entry point for BFS-based SCS algorithm
+    
+    DPQueueSet->>Queue: :queue.from_list([{0, 0, []}])
+    Queue-->>DPQueueSet: initial_queue
+    
+    DPQueueSet->>SeenSet: MapSet.new()
+    SeenSet-->>DPQueueSet: empty_seen_set
+    
+    DPQueueSet->>BFS: breadth_first_search(queue, seen_set, s1, s2)
+    
+    Note over BFS: BFS Loop - Explore states until solution found
+    
+    loop While queue not empty
+        BFS->>Queue: :queue.out(queue)
+        Queue-->>BFS: {{:value, {i, j, char_acc}}, remaining_queue}
+        
+        BFS->>SeenSet: MapSet.member?(seen_coords, {i, j})
+        SeenSet-->>BFS: already_seen?
+        
+        alt State already seen
+            Note over BFS: Skip this state to avoid redundant work
+            BFS->>BFS: Continue to next iteration
+        else New state - process it
+            BFS->>SeenSet: MapSet.put(seen_coords, {i, j})
+            SeenSet-->>BFS: updated_seen_set
+            
+            alt Complete solution (i == len(s1) && j == len(s2))
+                Note over BFS: Found solution - both strings exhausted
+                BFS->>BFS: Enum.reverse(char_acc)
+                BFS->>BFS: List.to_string(reversed_acc)
+                BFS-->>DPQueueSet: supersequence_string
+                DPQueueSet-->>Client: shortest_common_supersequence
+            
+            else s1 exhausted (i == len(s1))
+                Note over BFS: Must take remaining chars from s2
+                BFS->>BFS: Get char = String.at(s2, j)
+                BFS->>Queue: :queue.in({i, j+1, [char|char_acc]}, queue)
+                Queue-->>BFS: updated_queue
+                BFS->>BFS: Recursive call with updated queue
+            
+            else s2 exhausted (j == len(s2))
+                Note over BFS: Must take remaining chars from s1
+                BFS->>BFS: Get char = String.at(s1, i)
+                BFS->>Queue: :queue.in({i+1, j, [char|char_acc]}, queue)
+                Queue-->>BFS: updated_queue
+                BFS->>BFS: Recursive call with updated queue
+            
+            else Characters match (s1[i] == s2[j])
+                Note over BFS: Optimization - take common char, advance both
+                BFS->>BFS: Get char = String.at(s1, i)
+                BFS->>Queue: :queue.in({i+1, j+1, [char|char_acc]}, queue)
+                Queue-->>BFS: updated_queue
+                BFS->>BFS: Recursive call with updated queue
+            
+            else Characters don't match
+                Note over BFS: Try both possibilities - branch exploration
+                BFS->>BFS: Get char1 = String.at(s1, i)
+                BFS->>BFS: Get char2 = String.at(s2, j)
+                
+                BFS->>Queue: :queue.in({i+1, j, [char1|char_acc]}, queue)
+                Queue-->>BFS: queue_with_s1_choice
+                
+                BFS->>Queue: :queue.in({i, j+1, [char2|char_acc]}, queue_with_s1_choice)
+                Queue-->>BFS: queue_with_both_choices
+                
+                BFS->>BFS: Recursive call with updated queue
+            end
+        end
+    end
+    
+    Note over Client,SeenSet: Algorithm Complete:<br/>Time: O(m×n), Space: O(m×n)<br/>BFS guarantees shortest solution

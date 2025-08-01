@@ -1,0 +1,179 @@
+# Shortest Common Supersequence - Naive Implementation Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Naive as Naive.run/2
+    participant Compare as compare/3
+    participant StringOps as String Operations
+
+    Client->>Naive: run(s1, s2)
+    Note over Naive: Entry point for naive recursive algorithm
+    
+    Naive->>StringOps: String.graphemes(s1)
+    StringOps-->>Naive: chars1
+    
+    Naive->>StringOps: String.graphemes(s2)
+    StringOps-->>Naive: chars2
+    
+    Naive->>Compare: compare([], chars1, chars2)
+    
+    Note over Compare: Recursive pattern matching with multiple cases
+    
+    rect rgb(255, 240, 240)
+        Note over Compare: Base Cases
+        
+        alt All lists empty: compare([], [], [])
+            Compare-->>Compare: Return []
+        
+        else Both input lists start with same char: compare([], [a|t2], [a|t3])
+            Note over Compare: Optimization - add char once, advance both
+            Compare->>Compare: compare([a], t2, t3)
+        
+        else Different first chars: compare([], [h2|t2], [h3|t3])
+            Note over Compare: Add both chars to accumulator
+            Compare->>Compare: compare([h2, h3], t2, t3)
+        end
+    end
+    
+    rect rgb(240, 255, 240)
+        Note over Compare: Processing Complete Cases
+        
+        alt Both input lists empty: compare(acc, [], [])
+            Compare-->>Compare: Return acc
+        end
+    end
+    
+    rect rgb(240, 240, 255)
+        Note over Compare: Single List Exhausted Cases
+        
+        alt First list empty, second has chars: compare(acc, [], [h3|t3])
+            Compare->>Compare: compare([h3|acc], [], t3)
+        
+        else First list empty, char matches acc: compare([a|_], [], [a|t3])
+            Note over Compare: Skip duplicate char
+            Compare->>Compare: compare(acc, [], t3)
+        
+        else Second list empty, char matches acc: compare([a|_], [a|t2], [])
+            Note over Compare: Skip duplicate char
+            Compare->>Compare: compare(acc, t2, [])
+        
+        else Second list empty, first has chars: compare(acc, [h2|t2], [])
+            Compare->>Compare: compare([h2|acc], t2, [])
+        end
+    end
+    
+    rect rgb(255, 255, 240)
+        Note over Compare: Optimization Cases
+        
+        alt Both lists start with same char: compare(acc, [a|t2], [a|t3])
+            Note over Compare: Add char once, advance both
+            Compare->>Compare: compare([a|acc], t2, t3)
+        
+        else All three have same char: compare([a|_], [a|t2], [a|t3])
+            Note over Compare: Use existing char, advance both lists
+            Compare->>Compare: compare(acc, t2, t3)
+        
+        else Acc and first list share char: compare([a|_], [a|t2], chars2)
+            Note over Compare: Skip char from first list
+            Compare->>Compare: compare(acc, t2, chars2)
+        
+        else Acc and second list share char: compare([a|_], chars1, [a|t3])
+            Note over Compare: Skip char from second list
+            Compare->>Compare: compare(acc, chars1, t3)
+        end
+    end
+    
+    rect rgb(255, 245, 255)
+        Note over Compare: General Case
+        
+        alt No optimizations apply: compare(acc, [h2|t2], [h3|t3])
+            Note over Compare: Take from both lists
+            Compare->>Compare: compare([h2, h3|acc], t2, t3)
+        end
+    end
+    
+    Note over Compare: Recursion continues until base case reached
+    
+    Compare-->>Naive: final_char_list
+    
+    Naive->>StringOps: Enum.reverse(final_char_list)
+    StringOps-->>Naive: reversed_chars
+    
+    Naive->>StringOps: Enum.join(reversed_chars)
+    StringOps-->>Naive: result_string
+    
+    Naive-->>Client: shortest_common_supersequence
+    
+    Note over Client,StringOps: Algorithm Complete:<br/>Time: O(2^(m+n)), Space: O(m+n)<br/>Exponential but with optimizations
+```
+
+## Algorithm Overview
+
+The sequence diagram illustrates the naive recursive approach for finding the Shortest Common Supersequence:
+
+### Key Characteristics
+
+1. **Recursive Pattern Matching**: Uses multiple function clauses to handle different cases
+2. **Character-by-Character Processing**: Converts strings to character lists for easier manipulation
+3. **Accumulator Pattern**: Builds result in reverse order for efficient prepending
+4. **Multiple Optimizations**: Several pattern matching clauses to avoid redundant characters
+
+### Algorithm Flow
+
+1. **Initialization**:
+   - Convert input strings to character lists using `String.graphemes/1`
+   - Start recursion with empty accumulator
+
+2. **Recursive Cases** (in order of pattern matching):
+   
+   **Base Cases**:
+   - All empty: Return empty list
+   - Both inputs start with same char: Add once, advance both
+   - Different first chars: Add both to accumulator
+   
+   **Completion Cases**:
+   - Both inputs exhausted: Return accumulator
+   
+   **Single List Exhausted**:
+   - First empty: Take from second (with duplicate check)
+   - Second empty: Take from first (with duplicate check)
+   
+   **Optimization Cases**:
+   - Both inputs same char: Add once
+   - All three lists same char: Skip (already have it)
+   - Accumulator matches input: Skip redundant char
+   
+   **General Case**:
+   - No optimizations: Take from both inputs
+
+3. **Result Construction**:
+   - Reverse accumulated character list
+   - Join characters into final string
+
+### Pattern Matching Priority
+
+The function clauses are ordered by specificity, with more specific patterns matched first:
+1. **Empty cases** (most specific)
+2. **Single character optimizations**
+3. **Exhausted list cases**
+4. **General optimization cases**
+5. **Fallback case** (least specific)
+
+### Optimizations
+
+- **Duplicate Elimination**: Avoids adding characters already in accumulator
+- **Common Character Handling**: When both inputs have same character, adds only once
+- **Early Termination**: Base cases stop recursion when processing complete
+
+### Complexity Analysis
+
+- **Time**: O(2^(m+n)) in worst case due to exponential branching
+- **Space**: O(m+n) for recursion stack depth
+- **Optimizations**: Reduce constant factors but don't change asymptotic complexity
+
+### Key Functions
+
+- `run/2`: Entry point that handles string conversion and result formatting
+- `compare/3`: Recursive workhorse with multiple pattern-matched clauses
+- String operations: `graphemes/1`, `reverse/1`, `join/1` for data transformation 

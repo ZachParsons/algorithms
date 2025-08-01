@@ -1,0 +1,81 @@
+sequenceDiagram
+    participant Client
+    participant DPMatrix as DPMatrix.run/2
+    participant BuildMatrix as build_dp_matrix/2
+    participant FillMatrix as fill_matrix/5
+    participant GetValue as get_value/3
+    participant UpdateMatrix as update_matrix/4
+    participant ConstructSeq as construct_supersequence/3
+    participant Backtrack as backtrack/6
+
+    Client->>DPMatrix: run(s1, s2)
+    Note over DPMatrix: Entry point for SCS algorithm
+    
+    DPMatrix->>BuildMatrix: build_dp_matrix(s1, s2)
+    
+    Note over BuildMatrix: Phase 1: Build DP Matrix for LCS
+    BuildMatrix->>BuildMatrix: Calculate m = length(s1), n = length(s2)
+    BuildMatrix->>BuildMatrix: Convert strings to charlists
+    BuildMatrix->>BuildMatrix: Initialize (m+1)×(n+1) matrix with zeros
+    
+    BuildMatrix->>FillMatrix: fill_matrix(matrix, s1_chars, s2_chars, m, n)
+    
+    Note over FillMatrix: Fill matrix using DP recurrence relation
+    FillMatrix->>FillMatrix: Generate indices for all (i,j) pairs
+    
+    loop For each cell (i,j) in matrix
+        FillMatrix->>FillMatrix: Get char1 = s1[i-1], char2 = s2[j-1]
+        
+        alt Characters match (char1 == char2)
+            FillMatrix->>GetValue: get_value(matrix, i-1, j-1)
+            GetValue-->>FillMatrix: diagonal_value
+            FillMatrix->>FillMatrix: new_value = 1 + diagonal_value
+        else Characters don't match
+            FillMatrix->>GetValue: get_value(matrix, i-1, j)
+            GetValue-->>FillMatrix: left_value
+            FillMatrix->>GetValue: get_value(matrix, i, j-1)
+            GetValue-->>FillMatrix: top_value
+            FillMatrix->>FillMatrix: new_value = max(left_value, top_value)
+        end
+        
+        FillMatrix->>UpdateMatrix: update_matrix(matrix, i, j, new_value)
+        UpdateMatrix-->>FillMatrix: updated_matrix
+    end
+    
+    FillMatrix-->>BuildMatrix: completed_matrix
+    BuildMatrix-->>DPMatrix: dp_matrix
+    
+    Note over DPMatrix: Phase 2: Construct Supersequence
+    DPMatrix->>ConstructSeq: construct_supersequence(dp_matrix, s1, s2)
+    
+    ConstructSeq->>ConstructSeq: Calculate m = length(s1), n = length(s2)
+    ConstructSeq->>ConstructSeq: Convert strings to charlists
+    ConstructSeq->>Backtrack: backtrack(matrix, s1_chars, s2_chars, m, n, [])
+    
+    Note over Backtrack: Backtrack through matrix to build supersequence
+    
+    loop Until i=0 and j=0
+        alt i = 0 (no more chars in s1)
+            Backtrack->>Backtrack: Add s2[j-1] to result, j = j-1
+        else j = 0 (no more chars in s2)
+            Backtrack->>Backtrack: Add s1[i-1] to result, i = i-1
+        else Characters match
+            Backtrack->>Backtrack: Add char to result, i = i-1, j = j-1
+        else matrix[i-1][j] > matrix[i][j-1]
+            Backtrack->>GetValue: get_value(matrix, i-1, j)
+            GetValue-->>Backtrack: left_value
+            Backtrack->>GetValue: get_value(matrix, i, j-1)
+            GetValue-->>Backtrack: top_value
+            Backtrack->>Backtrack: Add s1[i-1] to result, i = i-1
+        else matrix[i][j-1] >= matrix[i-1][j]
+            Backtrack->>Backtrack: Add s2[j-1] to result, j = j-1
+        end
+    end
+    
+    Backtrack-->>ConstructSeq: character_list
+    ConstructSeq->>ConstructSeq: Convert to string
+    ConstructSeq-->>DPMatrix: supersequence_string
+    
+    DPMatrix-->>Client: shortest_common_supersequence
+    
+    Note over Client,Backtrack: Algorithm Complete:<br/>Time: O(m×n), Space: O(m×n)
