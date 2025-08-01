@@ -1,0 +1,43 @@
+flowchart TD
+    Start([Start: breadth_first_level_order/1]) --> CheckRoot{Is root nil?}
+    
+    CheckRoot -->|Yes| ReturnEmpty
+    CheckRoot -->|No| InitQueue
+    
+    InitQueue --> ProcessQueue[Call private breadth_first_level_order/2 with queue and result]
+    
+    ProcessQueue --> CheckQueue{Is queue empty?}
+    
+    CheckQueue -->|Yes| ReturnReversed[Reverse result and return: Enum.reverse/1]
+    CheckQueue -->|No| CheckHead{Is head of queue nil?}
+    
+    CheckHead -->|Yes| SkipNil[Skip nil node: breadth_first_level_order/2 with rest of queue]
+    CheckHead -->|No| ProcessNode[Extract node: value, left, right from head]
+    
+    SkipNil --> ProcessQueue
+    
+    ProcessNode --> AddValue
+    AddValue --> EnqueueChildren
+    EnqueueChildren --> RecurseWithUpdatedQueue[Call breadth_first_level_order/2 with new queue and result]
+    
+    RecurseWithUpdatedQueue --> ProcessQueue
+    
+    ReturnReversed --> End([End])
+    ReturnEmpty --> End
+    
+    %% Queue visualization
+    QueueState
+    
+    %% Styling
+    classDef startEnd fill:#e1f5fe
+    classDef decision fill:#fff3e0
+    classDef process fill:#e8f5e8
+    classDef queueOp fill:#e8eaf6
+    classDef breadthSpecific fill:#f1f8e9
+    classDef visualization fill:#fafafa,stroke:#666,stroke-dasharray: 5 5
+    
+    class Start,End startEnd
+    class CheckRoot,CheckQueue,CheckHead decision
+    class InitQueue,ProcessNode,AddValue,EnqueueChildren,ReturnReversed,ReturnEmpty breadthSpecific
+    class ProcessQueue,SkipNil,RecurseWithUpdatedQueue queueOp
+    class QueueState visualization
