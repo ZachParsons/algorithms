@@ -1,0 +1,42 @@
+flowchart TD
+    Start([Start: depth_first_inorder/1]) --> CheckNode{Is node nil?}
+    
+    CheckNode -->|Yes| ReturnEmpty
+    CheckNode -->|No| ExtractValue[Extract: value, left, right from Node]
+    
+    ExtractValue --> RecurseLeft[Recursively call depth_first_inorder/1 on left child]
+    
+    RecurseLeft --> LeftCheck{Is left child nil?}
+    LeftCheck -->|Yes| LeftEmpty
+    LeftCheck -->|No| LeftProcess[Left subtree processing...]
+    
+    LeftEmpty --> ProcessValue[Process current value]
+    LeftProcess --> LeftResult[Left returns: list of values]
+    LeftResult --> ProcessValue
+    
+    ProcessValue --> RecurseRight[Recursively call depth_first_inorder/1 on right child]
+    
+    RecurseRight --> RightCheck{Is right child nil?}
+    RightCheck -->|Yes| RightEmpty
+    RightCheck -->|No| RightProcess[Right subtree processing...]
+    
+    RightEmpty --> CombineResults
+    RightProcess --> RightResult[Right returns: list of values]
+    RightResult --> CombineResults
+    
+    CombineResults --> ReturnResult[Return combined list]
+    ReturnResult --> End([End])
+    
+    ReturnEmpty --> End
+    
+    %% Styling
+    classDef startEnd fill:#e1f5fe
+    classDef decision fill:#fff3e0
+    classDef process fill:#e8f5e8
+    classDef recursion fill:#fce4ec
+    classDef inorderSpecific fill:#f3e5f5
+    
+    class Start,End startEnd
+    class CheckNode,LeftCheck,RightCheck decision
+    class ExtractValue,ProcessValue,CombineResults,ReturnResult,ReturnEmpty inorderSpecific
+    class RecurseLeft,RecurseRight,LeftProcess,RightProcess recursion
