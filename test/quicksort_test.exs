@@ -60,6 +60,55 @@ defmodule Algorithms.QuicksortTest do
     end
   end
 
+  describe "parallel_sort/1" do
+    test "sorts an empty list" do
+      assert Quicksort.parallel_sort([]) == []
+    end
+
+    test "sorts a single element list" do
+      assert Quicksort.parallel_sort([42]) == [42]
+    end
+
+    test "sorts a list with duplicate elements" do
+      assert Quicksort.parallel_sort([3, 1, 4, 1, 5, 9, 2, 6, 5]) == [1, 1, 2, 3, 4, 5, 5, 6, 9]
+    end
+
+    test "sorts an already sorted list" do
+      assert Quicksort.parallel_sort([1, 2, 3, 4, 5]) == [1, 2, 3, 4, 5]
+    end
+
+    test "sorts negative numbers" do
+      assert Quicksort.parallel_sort([-3, -1, -4, -1, -5]) == [-5, -4, -3, -1, -1]
+    end
+
+    test "sorts mixed positive and negative numbers" do
+      assert Quicksort.parallel_sort([3, -1, 4, -2, 0, 1]) == [-2, -1, 0, 1, 3, 4]
+    end
+
+    test "sorts floating point numbers" do
+      assert Quicksort.parallel_sort([3.14, 2.71, 1.41, 1.73]) == [1.41, 1.73, 2.71, 3.14]
+    end
+
+    test "parallel and sequential give same results" do
+      test_lists = [
+        [3, 1, 4, 1, 5, 9, 2, 6, 5],
+        [5, 4, 3, 2, 1],
+        [1, 2, 3, 4, 5],
+        [-3, -1, 4, -2, 0, 1],
+        [42],
+        []
+      ]
+
+      for list <- test_lists do
+        sequential_result = Quicksort.sort(list)
+        parallel_result = Quicksort.parallel_sort(list)
+
+        assert sequential_result == parallel_result,
+               "Results differ for #{inspect(list)}: sequential=#{inspect(sequential_result)}, parallel=#{inspect(parallel_result)}"
+      end
+    end
+  end
+
   describe "property-based testing" do
     test "sorting is idempotent" do
       list = [5, 2, 8, 1, 9, 3]
