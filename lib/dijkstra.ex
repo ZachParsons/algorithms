@@ -41,6 +41,19 @@ defmodule Algorithms.Dijkstra do
   - You're working with simple map-based graphs
   - You need the complete path immediately without reconstruction
 
+  ## Recommendation Matrix
+
+  | Use Case                        | Recommended Implementation | Reason                           |
+  |---------------------------------|---------------------------|-----------------------------------|
+  | Single path, sparse graph       | `shortest_path_search/3`  | Early termination advantage       |
+  | Multiple paths, same source     | `shortest_path_tree/2`    | Amortized cost benefits           |
+  | Memory-constrained environment  | `shortest_path_tree/2`    | O(V) vs O(V×P) memory             |
+  | Dense graphs                    | `shortest_path_tree/2`    | Avoids path explosion             |
+  | Production systems              | `shortest_path_tree/2`    | Standard, well-tested approach    |
+  | Coding interviews               | `shortest_path_search/3`  | Easier to implement under pressure|
+  | Educational purposes            | `shortest_path_tree/2`    | Matches academic literature       |
+  | Quick prototyping               | `shortest_path_search/3`  | Faster to implement               |
+
   ## Classic Dijkstra Algorithm Overview
 
   The algorithm works by:
