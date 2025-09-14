@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant Client
+    participant Sequential as Sequential Sort
+    participant Parallel as Parallel Sort
+    participant Processes as Spawned Processes
+
+    Note over Client,Processes: Input: [5,4,3,2,1] → Expected: [1,2,3,4,5]
+    
+    rect rgb(200, 220, 240)
+        Note over Sequential: Sequential Approach
+        Client->>Sequential: sort([5,4,3,2,1])
+        Note over Sequential: Recursive calls:<br/>sort([4,3,2,1]) → [1,2,3,4]<br/>sort([3,2,1]) → [1,2,3]<br/>sort([2,1]) → [1,2]<br/>sort([1]) → [1]<br/>sort([]) → []
+        Sequential-->>Client: [1,2,3,4,5]
+    end
+    
+    rect rgb(240, 220, 200)
+        Note over Parallel: Parallel Approach
+        Client->>Parallel: parallel_sort([5,4,3,2,1])
+        Note over Parallel: depth = log2(schedulers) = 3
+        Parallel->>Processes: spawn processes for lesser/greater
+        Note over Processes: Concurrent sorting:<br/>Process1: [4,3,2,1] → [1,2,3,4]<br/>Process2: [] → []<br/>Nested spawns for deeper levels
+        Processes-->>Parallel: collect results via messages
+        Parallel-->>Client: [1,2,3,4,5]
+    end

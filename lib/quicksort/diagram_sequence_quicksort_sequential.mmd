@@ -1,0 +1,54 @@
+sequenceDiagram
+    participant Client
+    participant QS as Quicksort.sort/1
+    participant QS1 as sort([4,3,2,1])
+    participant QS2 as sort([])
+    participant QS3 as sort([3,2,1])
+    participant QS4 as sort([2,1])
+    participant QS5 as sort([1])
+    participant QS6 as sort([])
+    participant QS7 as sort([])
+    participant QS8 as sort([])
+
+    Client->>QS: sort([5,4,3,2,1])
+    Note over QS: pivot=5, lesser=[4,3,2,1], greater=[]
+    
+    QS->>QS1: sort([4,3,2,1])
+    Note over QS1: pivot=4, lesser=[3,2,1], greater=[]
+    
+    QS1->>QS3: sort([3,2,1])
+    Note over QS3: pivot=3, lesser=[2,1], greater=[]
+    
+    QS3->>QS4: sort([2,1])
+    Note over QS4: pivot=2, lesser=[1], greater=[]
+    
+    QS4->>QS5: sort([1])
+    Note over QS5: pivot=1, lesser=[], greater=[]
+    
+    QS5->>QS6: sort([])
+    QS6-->>QS5: []
+    
+    QS5->>QS7: sort([])
+    QS7-->>QS5: []
+    
+    QS5-->>QS4: [1]
+    
+    QS4->>QS8: sort([])
+    QS8-->>QS4: []
+    
+    QS4-->>QS3: [1] ++ [2] ++ [] = [1,2]
+    
+    QS3->>QS2: sort([])
+    QS2-->>QS3: []
+    
+    QS3-->>QS1: [1,2] ++ [3] ++ [] = [1,2,3]
+    
+    QS1->>QS2: sort([])
+    QS2-->>QS1: []
+    
+    QS1-->>QS: [1,2,3] ++ [4] ++ [] = [1,2,3,4]
+    
+    QS->>QS2: sort([])
+    QS2-->>QS: []
+    
+    QS-->>Client: [1,2,3,4] ++ [5] ++ [] = [1,2,3,4,5]
