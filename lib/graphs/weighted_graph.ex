@@ -13,7 +13,7 @@ defmodule Algorithms.WeightedGraph do
   def new, do: %__MODULE__{}
 
   @doc """
-  Adds an edge from source to destination with the given weight.
+  Adds an edge from source to target with the given weight.
   For undirected graphs, you need to add edges in both directions.
   """
   def add_edge(%__MODULE__{nodes: nodes} = graph, from, to, weight) when weight >= 0 do

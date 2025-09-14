@@ -20,10 +20,10 @@ defmodule Algorithms.Graphs.Dijkstra do
   | Aspect             | `shortest_path_tree/2`                    | `shortest_path_search/3`            |
   |--------------------|-------------------------------------------|-------------------------------------|
   | **Algorithm Type** | Classic Dijkstra (tree-building)          | Modified Dijkstra (targeted search) |
-  | **Scope**          | Source → **ALL nodes**                    | Source → **SPECIFIC destination**   |
-  | **Termination**    | When all nodes processed                  | When **destination found**          |
+  | **Scope**          | Source → **ALL nodes**                    | Source → **SPECIFIC target**   |
+  | **Termination**    | When all nodes processed                  | When **target found**          |
   | **Data Structure** | Distance map + previous pointers          | Complete paths in priority queue    |
-  | **Use Case**       | Multiple destination queries              | Single destination queries          |
+  | **Use Case**       | Multiple target queries              | Single target queries          |
   | **Memory Usage**   | O(V)                                      | O(V × P) where P = path length      |
   | **Performance**    | Always explores all reachable             | **Early termination** advantage     |
   | **Graph Format**   | `Graph` struct with adjacency list        | Map with `{cost, neighbor}` tuples  |
@@ -32,13 +32,13 @@ defmodule Algorithms.Graphs.Dijkstra do
   ## When to Use Which Implementation
 
   **Use `shortest_path_tree/2` when:**
-  - You need distances to multiple destinations from the same source
+  - You need distances to multiple targets from the same source
   - You're working with the structured `Graph` format
   - You want the classic academic Dijkstra implementation
   - Memory efficiency is important (O(V) vs O(V×P))
 
   **Use `shortest_path_search/3` when:**
-  - You need a path to a single specific destination
+  - You need a path to a single specific target
   - You want early termination for better performance
   - You're working with simple map-based graphs
   - You need the complete path immediately without reconstruction
@@ -131,15 +131,15 @@ defmodule Algorithms.Graphs.Dijkstra do
       iex> Algorithms.Graphs.Dijkstra.shortest_path(graph, "A", "B")
       {:ok, {3, ["A", "C", "B"]}}
   """
-  def shortest_path(graph = %WeightedGraph{}, source, destination) do
+  def shortest_path(graph = %WeightedGraph{}, source, target) do
     distances = shortest_path_tree(graph, source)
 
-    case Map.get(distances, destination) do
+    case Map.get(distances, target) do
       {distance, _} when distance == :infinity ->
         {:error, :no_path}
 
       {distance, _} ->
-        path = reconstruct_path(distances, source, destination)
+        path = reconstruct_path(distances, source, target)
         {:ok, {distance, path}}
     end
   end
@@ -219,9 +219,9 @@ defmodule Algorithms.Graphs.Dijkstra do
     end
   end
 
-  # Reconstruct the path from source to destination using the previous node information
-  defp reconstruct_path(distances, source, destination) do
-    build_path(distances, destination, [destination], source)
+  # Reconstruct the path from source to target using the previous node information
+  defp reconstruct_path(distances, source, target) do
+    build_path(distances, target, [target], source)
   end
 
   defp build_path(_distances, source, path, source), do: path
@@ -232,11 +232,11 @@ defmodule Algorithms.Graphs.Dijkstra do
   end
 
   @doc """
-  Performs targeted shortest path search from source to specific destination.
+  Performs targeted shortest path search from source to specific target.
 
   This implementation uses a path-based approach that maintains complete paths
-  and costs in a priority queue, with early termination when the destination is found.
-  More efficient for single source-destination queries compared to building full tree.
+  and costs in a priority queue, with early termination when the target is found.
+  More efficient for single source-target queries compared to building full tree.
 
   Graph format: A map where each node maps to a list of {cost, neighbor} tuples.
 
@@ -255,20 +255,20 @@ defmodule Algorithms.Graphs.Dijkstra do
       iex> Algorithms.Graphs.Dijkstra.shortest_path_search(graph, :a, :e)
       {20, [:a, :c, :f, :e]}
   """
-  def shortest_path_search(graph, start, destination) when is_map(graph) do
-    do_shortest_path_search(graph, [{0, [start]}], destination, %{})
+  def shortest_path_search(graph, start, target) when is_map(graph) do
+    do_shortest_path_search(graph, [{0, [start]}], target, %{})
   end
 
   # Base case: empty routes, no path found
-  defp do_shortest_path_search(_graph, [], _destination, _visited) do
+  defp do_shortest_path_search(_graph, [], _target, _visited) do
     {0, []}
   end
 
-  # Base case: reached destination
+  # Base case: reached target
   defp do_shortest_path_search(
          _graph,
-         [{cost, [destination | _] = path} | _],
-         destination,
+         [{cost, [target | _] = path} | _],
+         target,
          _visited
        ) do
     {cost, Enum.reverse(path)}
@@ -278,7 +278,7 @@ defmodule Algorithms.Graphs.Dijkstra do
   defp do_shortest_path_search(
          graph,
          [{cost, [node | _] = path} | routes],
-         destination,
+         target,
          visited
        ) do
     # Get neighbors of current node, defaulting to empty list if node not in graph
@@ -294,7 +294,7 @@ defmodule Algorithms.Graphs.Dijkstra do
     do_shortest_path_search(
       graph,
       Enum.sort(new_routes ++ routes),
-      destination,
+      target,
       Map.put(visited, node, true)
     )
   end
