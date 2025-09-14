@@ -1,4 +1,4 @@
-defmodule Algorithms.DijkstraTest do
+defmodule Algorithms.Graphs.DijkstraTest do
   use ExUnit.Case
   alias Algorithms.Graph
   alias Algorithms.Dijkstra
