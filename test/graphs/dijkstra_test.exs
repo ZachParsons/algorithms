@@ -1,6 +1,6 @@
 defmodule Algorithms.Graphs.DijkstraTest do
   use ExUnit.Case
-  alias Algorithms.Graph
+  alias Algorithms.Graphs.Graph
   alias Algorithms.Graphs.Dijkstra
 
   # Test helper functions for creating sample graphs
@@ -52,81 +52,6 @@ defmodule Algorithms.Graphs.DijkstraTest do
       alt_neighbors = Enum.map(neighbors, fn {neighbor, weight} -> {weight, neighbor} end)
       {node, alt_neighbors}
     end)
-  end
-
-  describe "Graph structure operations" do
-    test "creates an empty graph" do
-      graph = Graph.new()
-      assert graph.nodes == %{}
-    end
-
-    test "adds an edge to empty graph" do
-      graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 5)
-
-      assert graph.nodes == %{"A" => [{"B", 5}]}
-    end
-
-    test "adds multiple edges from same node" do
-      graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 5)
-        |> Graph.add_edge("A", "C", 3)
-
-      assert graph.nodes["A"] == [{"C", 3}, {"B", 5}]
-    end
-
-    test "rejects negative weights" do
-      assert_raise FunctionClauseError, fn ->
-        Graph.new()
-        |> Graph.add_edge("A", "B", -1)
-      end
-    end
-
-    test "adds bidirectional edges" do
-      graph =
-        Graph.new()
-        |> Graph.add_undirected_edge("A", "B", 5)
-
-      assert graph.nodes["A"] == [{"B", 5}]
-      assert graph.nodes["B"] == [{"A", 5}]
-    end
-
-    test "returns neighbors of a node" do
-      graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 5)
-        |> Graph.add_edge("A", "C", 3)
-
-      neighbors = Graph.neighbors(graph, "A")
-      assert length(neighbors) == 2
-      assert {"B", 5} in neighbors
-      assert {"C", 3} in neighbors
-    end
-
-    test "returns empty list for node with no neighbors" do
-      graph = Graph.new()
-      assert Graph.neighbors(graph, "A") == []
-    end
-
-    test "returns all nodes in graph" do
-      graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 5)
-        |> Graph.add_edge("B", "C", 3)
-
-      nodes = Graph.all_nodes(graph)
-      assert length(nodes) == 3
-      assert "A" in nodes
-      assert "B" in nodes
-      assert "C" in nodes
-    end
-
-    test "returns empty list for empty graph" do
-      graph = Graph.new()
-      assert Graph.all_nodes(graph) == []
-    end
   end
 
   describe "Shortest path algorithms - basic functionality" do

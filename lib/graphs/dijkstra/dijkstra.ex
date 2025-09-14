@@ -1,5 +1,5 @@
 defmodule Algorithms.Graphs.Dijkstra do
-  alias Algorithms.Graph
+  alias Algorithms.Graphs.Graph
 
   @moduledoc """
   Two implementations of Dijkstra's algorithm for finding shortest paths in graphs.
@@ -45,16 +45,16 @@ defmodule Algorithms.Graphs.Dijkstra do
 
   ## Recommendation Matrix
 
-  | Use Case                        | Recommended Implementation | Reason                           |
-  |---------------------------------|---------------------------|-----------------------------------|
-  | Single path, sparse graph       | `shortest_path_search/3`  | Early termination advantage       |
-  | Multiple paths, same source     | `shortest_path_tree/2`    | Amortized cost benefits           |
-  | Memory-constrained environment  | `shortest_path_tree/2`    | O(V) vs O(V×P) memory             |
-  | Dense graphs                    | `shortest_path_tree/2`    | Avoids path explosion             |
-  | Production systems              | `shortest_path_tree/2`    | Standard, well-tested approach    |
-  | Coding interviews               | `shortest_path_search/3`  | Easier to implement under pressure|
-  | Educational purposes            | `shortest_path_tree/2`    | Matches academic literature       |
-  | Quick prototyping               | `shortest_path_search/3`  | Faster to implement               |
+  | Use Case                        | Recommended Implementation | Reason                            |
+  |---------------------------------|----------------------------|-----------------------------------|
+  | Single path, sparse graph       | `shortest_path_search/3`   | Early termination advantage       |
+  | Multiple paths, same source     | `shortest_path_tree/2`     | Amortized cost benefits           |
+  | Memory-constrained environment  | `shortest_path_tree/2`     | O(V) vs O(V×P) memory             |
+  | Dense graphs                    | `shortest_path_tree/2`     | Avoids path explosion             |
+  | Production systems              | `shortest_path_tree/2`     | Standard, well-tested approach    |
+  | Coding interviews               | `shortest_path_search/3`   | Easier to implement under pressure|
+  | Educational purposes            | `shortest_path_tree/2`     | Matches academic literature       |
+  | Quick prototyping               | `shortest_path_search/3`   | Faster to implement               |
 
   ## Classic Dijkstra Algorithm Overview
 
@@ -83,13 +83,13 @@ defmodule Algorithms.Graphs.Dijkstra do
   ## Examples
 
       iex> graph = Algorithms.Graph.new()
-      ...> |> Algorithms.Graph.add_edge("A", "B", 4)
-      ...> |> Algorithms.Graph.add_edge("A", "C", 2)
-      ...> |> Algorithms.Graph.add_edge("B", "C", 1)
-      ...> |> Algorithms.Graph.add_edge("B", "D", 5)
-      ...> |> Algorithms.Graph.add_edge("C", "D", 8)
-      ...> |> Algorithms.Graph.add_edge("C", "E", 10)
-      ...> |> Algorithms.Graph.add_edge("D", "E", 2)
+      ...> |> Algorithms.Graphs.Graph.add_edge("A", "B", 4)
+      ...> |> Algorithms.Graphs.Graph.add_edge("A", "C", 2)
+      ...> |> Algorithms.Graphs.Graph.add_edge("B", "C", 1)
+      ...> |> Algorithms.Graphs.Graph.add_edge("B", "D", 5)
+      ...> |> Algorithms.Graphs.Graph.add_edge("C", "D", 8)
+      ...> |> Algorithms.Graphs.Graph.add_edge("C", "E", 10)
+      ...> |> Algorithms.Graphs.Graph.add_edge("D", "E", 2)
       iex> Algorithms.Graphs.Dijkstra.shortest_path_tree(graph, "A")
       %{
         "A" => {0, nil},
@@ -125,9 +125,9 @@ defmodule Algorithms.Graphs.Dijkstra do
   ## Examples
 
       iex> graph = Algorithms.Graph.new()
-      ...> |> Algorithms.Graph.add_edge("A", "B", 4)
-      ...> |> Algorithms.Graph.add_edge("A", "C", 2)
-      ...> |> Algorithms.Graph.add_edge("C", "B", 1)
+      ...> |> Algorithms.Graphs.Graph.add_edge("A", "B", 4)
+      ...> |> Algorithms.Graphs.Graph.add_edge("A", "C", 2)
+      ...> |> Algorithms.Graphs.Graph.add_edge("C", "B", 1)
       iex> Algorithms.Graphs.Dijkstra.shortest_path(graph, "A", "B")
       {:ok, {3, ["A", "C", "B"]}}
   """
@@ -256,16 +256,16 @@ defmodule Algorithms.Graphs.Dijkstra do
       {20, [:a, :c, :f, :e]}
   """
   def shortest_path_search(graph, start, destination) when is_map(graph) do
-    shortest_path_search_impl(graph, [{0, [start]}], destination, %{})
+    do_shortest_path_search(graph, [{0, [start]}], destination, %{})
   end
 
   # Base case: empty routes, no path found
-  defp shortest_path_search_impl(_graph, [], _destination, _visited) do
+  defp do_shortest_path_search(_graph, [], _destination, _visited) do
     {0, []}
   end
 
   # Base case: reached destination
-  defp shortest_path_search_impl(
+  defp do_shortest_path_search(
          _graph,
          [{cost, [destination | _] = path} | _],
          destination,
@@ -275,7 +275,7 @@ defmodule Algorithms.Graphs.Dijkstra do
   end
 
   # Recursive case: explore neighbors
-  defp shortest_path_search_impl(
+  defp do_shortest_path_search(
          graph,
          [{cost, [node | _] = path} | routes],
          destination,
@@ -291,7 +291,7 @@ defmodule Algorithms.Graphs.Dijkstra do
           do: {cost + new_cost, [new_node | path]}
 
     # Continue with sorted routes (shortest cost first) and mark current node as visited
-    shortest_path_search_impl(
+    do_shortest_path_search(
       graph,
       Enum.sort(new_routes ++ routes),
       destination,

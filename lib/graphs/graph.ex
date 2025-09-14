@@ -1,4 +1,4 @@
-defmodule Algorithms.Graph do
+defmodule Algorithms.Graphs.Graph do
   @moduledoc """
   Represents a weighted graph as an adjacency list.
   Each node maps to a list of {neighbor, weight} tuples.
