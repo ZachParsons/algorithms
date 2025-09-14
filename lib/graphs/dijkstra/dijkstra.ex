@@ -1,4 +1,4 @@
-defmodule Algorithms.Dijkstra do
+defmodule Algorithms.Graphs.Dijkstra do
   alias Algorithms.Graph
 
   @moduledoc """
@@ -82,15 +82,15 @@ defmodule Algorithms.Dijkstra do
 
   ## Examples
 
-      iex> graph = Algorithms.Dijkstra.Graph.new()
-      ...> |> Algorithms.Dijkstra.Graph.add_edge("A", "B", 4)
-      ...> |> Algorithms.Dijkstra.Graph.add_edge("A", "C", 2)
-      ...> |> Algorithms.Dijkstra.Graph.add_edge("B", "C", 1)
-      ...> |> Algorithms.Dijkstra.Graph.add_edge("B", "D", 5)
-      ...> |> Algorithms.Dijkstra.Graph.add_edge("C", "D", 8)
-      ...> |> Algorithms.Dijkstra.Graph.add_edge("C", "E", 10)
-      ...> |> Algorithms.Dijkstra.Graph.add_edge("D", "E", 2)
-      iex> Algorithms.Dijkstra.shortest_path_tree(graph, "A")
+      iex> graph = Algorithms.Graph.new()
+      ...> |> Algorithms.Graph.add_edge("A", "B", 4)
+      ...> |> Algorithms.Graph.add_edge("A", "C", 2)
+      ...> |> Algorithms.Graph.add_edge("B", "C", 1)
+      ...> |> Algorithms.Graph.add_edge("B", "D", 5)
+      ...> |> Algorithms.Graph.add_edge("C", "D", 8)
+      ...> |> Algorithms.Graph.add_edge("C", "E", 10)
+      ...> |> Algorithms.Graph.add_edge("D", "E", 2)
+      iex> Algorithms.Graphs.Dijkstra.shortest_path_tree(graph, "A")
       %{
         "A" => {0, nil},
         "B" => {4, "A"},
@@ -124,11 +124,11 @@ defmodule Algorithms.Dijkstra do
 
   ## Examples
 
-      iex> graph = Algorithms.Dijkstra.Graph.new()
-      ...> |> Algorithms.Dijkstra.Graph.add_edge("A", "B", 4)
-      ...> |> Algorithms.Dijkstra.Graph.add_edge("A", "C", 2)
-      ...> |> Algorithms.Dijkstra.Graph.add_edge("C", "B", 1)
-      iex> Algorithms.Dijkstra.shortest_path(graph, "A", "B")
+      iex> graph = Algorithms.Graph.new()
+      ...> |> Algorithms.Graph.add_edge("A", "B", 4)
+      ...> |> Algorithms.Graph.add_edge("A", "C", 2)
+      ...> |> Algorithms.Graph.add_edge("C", "B", 1)
+      iex> Algorithms.Graphs.Dijkstra.shortest_path(graph, "A", "B")
       {:ok, {3, ["A", "C", "B"]}}
   """
   def shortest_path(graph = %Graph{}, source, destination) do
@@ -252,7 +252,7 @@ defmodule Algorithms.Dijkstra do
       ...>   :e => [{9, :f}, {6, :d}],
       ...>   :f => [{14, :a}, {2, :c}, {9, :e}]
       ...> }
-      iex> Algorithms.Dijkstra.shortest_path_search(graph, :a, :e)
+      iex> Algorithms.Graphs.Dijkstra.shortest_path_search(graph, :a, :e)
       {20, [:a, :c, :f, :e]}
   """
   def shortest_path_search(graph, start, destination) when is_map(graph) do
