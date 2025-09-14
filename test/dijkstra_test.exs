@@ -1,7 +1,7 @@
 defmodule Algorithms.DijkstraTest do
   use ExUnit.Case
+  alias Algorithms.Graph
   alias Algorithms.Dijkstra
-  alias Algorithms.Dijkstra.Graph
 
   # Test helper functions for creating sample graphs
 
