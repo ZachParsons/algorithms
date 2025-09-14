@@ -1,6 +1,6 @@
 defmodule Algorithms.Graphs.DijkstraTest do
   use ExUnit.Case
-  alias Algorithms.Graphs.Graph
+  alias Algorithms.WeightedGraph
   alias Algorithms.Graphs.Dijkstra
 
   # Test helper functions for creating sample graphs
@@ -8,28 +8,28 @@ defmodule Algorithms.Graphs.DijkstraTest do
   # Creates a sample graph for testing and demonstration purposes.
   # Returns a graph with nodes A, B, C, D, E connected with various weighted edges.
   defp sample_graph do
-    Graph.new()
-    |> Graph.add_edge("A", "B", 4)
-    |> Graph.add_edge("A", "C", 2)
-    |> Graph.add_edge("B", "C", 1)
-    |> Graph.add_edge("B", "D", 5)
-    |> Graph.add_edge("C", "D", 8)
-    |> Graph.add_edge("C", "E", 10)
-    |> Graph.add_edge("D", "E", 2)
-    |> Graph.add_edge("D", "F", 6)
-    |> Graph.add_edge("E", "F", 3)
+    WeightedGraph.new()
+    |> WeightedGraph.add_edge("A", "B", 4)
+    |> WeightedGraph.add_edge("A", "C", 2)
+    |> WeightedGraph.add_edge("B", "C", 1)
+    |> WeightedGraph.add_edge("B", "D", 5)
+    |> WeightedGraph.add_edge("C", "D", 8)
+    |> WeightedGraph.add_edge("C", "E", 10)
+    |> WeightedGraph.add_edge("D", "E", 2)
+    |> WeightedGraph.add_edge("D", "F", 6)
+    |> WeightedGraph.add_edge("E", "F", 3)
   end
 
   # Creates a sample undirected graph for testing.
   defp sample_undirected_graph do
-    Graph.new()
-    |> Graph.add_undirected_edge("A", "B", 4)
-    |> Graph.add_undirected_edge("A", "C", 2)
-    |> Graph.add_undirected_edge("B", "C", 1)
-    |> Graph.add_undirected_edge("B", "D", 5)
-    |> Graph.add_undirected_edge("C", "D", 8)
-    |> Graph.add_undirected_edge("C", "E", 10)
-    |> Graph.add_undirected_edge("D", "E", 2)
+    WeightedGraph.new()
+    |> WeightedGraph.add_undirected_edge("A", "B", 4)
+    |> WeightedGraph.add_undirected_edge("A", "C", 2)
+    |> WeightedGraph.add_undirected_edge("B", "C", 1)
+    |> WeightedGraph.add_undirected_edge("B", "D", 5)
+    |> WeightedGraph.add_undirected_edge("C", "D", 8)
+    |> WeightedGraph.add_undirected_edge("C", "E", 10)
+    |> WeightedGraph.add_undirected_edge("D", "E", 2)
   end
 
   # Creates a sample graph in the alternative format for testing the shortest_path_search function.
@@ -46,7 +46,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
   end
 
   # Helper function to convert traditional graph to alternative format
-  defp to_alternative_format(%Graph{nodes: nodes}) do
+  defp to_alternative_format(%WeightedGraph{nodes: nodes}) do
     nodes
     |> Enum.into(%{}, fn {node, neighbors} ->
       alt_neighbors = Enum.map(neighbors, fn {neighbor, weight} -> {weight, neighbor} end)
@@ -57,9 +57,9 @@ defmodule Algorithms.Graphs.DijkstraTest do
   describe "Shortest path algorithms - basic functionality" do
     test "finds path to adjacent node" do
       graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 4)
-        |> Graph.add_edge("A", "C", 2)
+        WeightedGraph.new()
+        |> WeightedGraph.add_edge("A", "B", 4)
+        |> WeightedGraph.add_edge("A", "C", 2)
 
       # Test traditional implementation
       {:ok, {traditional_cost, traditional_path}} = Dijkstra.shortest_path(graph, "A", "B")
@@ -78,8 +78,8 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
     test "finds path to same node" do
       graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 4)
+        WeightedGraph.new()
+        |> WeightedGraph.add_edge("A", "B", 4)
 
       # Test traditional implementation
       {:ok, {traditional_cost, traditional_path}} = Dijkstra.shortest_path(graph, "A", "A")
@@ -98,12 +98,12 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
     test "finds shortest path between connected nodes" do
       graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 4)
-        |> Graph.add_edge("A", "C", 2)
-        |> Graph.add_edge("B", "C", 1)
-        |> Graph.add_edge("B", "D", 5)
-        |> Graph.add_edge("C", "D", 8)
+        WeightedGraph.new()
+        |> WeightedGraph.add_edge("A", "B", 4)
+        |> WeightedGraph.add_edge("A", "C", 2)
+        |> WeightedGraph.add_edge("B", "C", 1)
+        |> WeightedGraph.add_edge("B", "D", 5)
+        |> WeightedGraph.add_edge("C", "D", 8)
 
       # A to D: A->B->D = 4+5 = 9, vs A->C->D = 2+8 = 10
       # Test traditional implementation
@@ -123,14 +123,14 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
     test "finds optimal path when multiple routes exist" do
       graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 4)
-        |> Graph.add_edge("A", "C", 2)
-        |> Graph.add_edge("B", "C", 1)
-        |> Graph.add_edge("B", "D", 5)
-        |> Graph.add_edge("C", "D", 8)
-        |> Graph.add_edge("C", "E", 10)
-        |> Graph.add_edge("D", "E", 2)
+        WeightedGraph.new()
+        |> WeightedGraph.add_edge("A", "B", 4)
+        |> WeightedGraph.add_edge("A", "C", 2)
+        |> WeightedGraph.add_edge("B", "C", 1)
+        |> WeightedGraph.add_edge("B", "D", 5)
+        |> WeightedGraph.add_edge("C", "D", 8)
+        |> WeightedGraph.add_edge("C", "E", 10)
+        |> WeightedGraph.add_edge("D", "E", 2)
 
       # A to E: A->C->E = 2+10 = 12, vs A->B->D->E = 4+5+2 = 11
       # Test traditional implementation
@@ -153,9 +153,9 @@ defmodule Algorithms.Graphs.DijkstraTest do
     test "handles disconnected graphs" do
       # Traditional implementation
       graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 1)
-        |> Graph.add_edge("C", "D", 1)
+        WeightedGraph.new()
+        |> WeightedGraph.add_edge("A", "B", 1)
+        |> WeightedGraph.add_edge("C", "D", 1)
 
       result = Dijkstra.shortest_path(graph, "A", "C")
       assert result == {:error, :no_path}
@@ -176,10 +176,10 @@ defmodule Algorithms.Graphs.DijkstraTest do
     test "handles non-existent nodes" do
       # Traditional implementation - test with node that exists but is disconnected
       graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 1)
+        WeightedGraph.new()
+        |> WeightedGraph.add_edge("A", "B", 1)
         # Add isolated nodes
-        |> Graph.add_edge("Z", "Y", 1)
+        |> WeightedGraph.add_edge("Z", "Y", 1)
 
       result = Dijkstra.shortest_path(graph, "A", "Z")
       assert result == {:error, :no_path}
@@ -193,9 +193,9 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
     test "handles zero-weight edges" do
       graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 0)
-        |> Graph.add_edge("B", "C", 5)
+        WeightedGraph.new()
+        |> WeightedGraph.add_edge("A", "B", 0)
+        |> WeightedGraph.add_edge("B", "C", 5)
 
       # Test traditional implementation
       {:ok, {traditional_cost, traditional_path}} = Dijkstra.shortest_path(graph, "A", "C")
@@ -214,9 +214,9 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
     test "handles self-loops" do
       graph =
-        Graph.new()
-        |> Graph.add_edge("A", "A", 1)
-        |> Graph.add_edge("A", "B", 2)
+        WeightedGraph.new()
+        |> WeightedGraph.add_edge("A", "A", 1)
+        |> WeightedGraph.add_edge("A", "B", 2)
 
       # Test traditional implementation
       result = Dijkstra.shortest_path_tree(graph, "A")
@@ -232,12 +232,12 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
     test "handles multiple edges between same nodes" do
       graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 5)
+        WeightedGraph.new()
+        |> WeightedGraph.add_edge("A", "B", 5)
         # Better path
-        |> Graph.add_edge("A", "B", 2)
+        |> WeightedGraph.add_edge("A", "B", 2)
         # Worse path
-        |> Graph.add_edge("A", "B", 10)
+        |> WeightedGraph.add_edge("A", "B", 10)
 
       # Test traditional implementation
       {:ok, {traditional_cost, _traditional_path}} = Dijkstra.shortest_path(graph, "A", "B")
@@ -254,7 +254,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
     test "handles single node graph" do
       # Traditional implementation
-      single_graph = Graph.new() |> Graph.add_edge("A", "A", 0)
+      single_graph = WeightedGraph.new() |> WeightedGraph.add_edge("A", "A", 0)
       result = Dijkstra.shortest_path_tree(single_graph, "A")
       assert result["A"] == {0, nil}
 
@@ -290,10 +290,10 @@ defmodule Algorithms.Graphs.DijkstraTest do
   describe "Shortest path algorithms - undirected graphs" do
     test "works with undirected graphs" do
       graph =
-        Graph.new()
-        |> Graph.add_undirected_edge("A", "B", 1)
-        |> Graph.add_undirected_edge("B", "C", 2)
-        |> Graph.add_undirected_edge("A", "C", 4)
+        WeightedGraph.new()
+        |> WeightedGraph.add_undirected_edge("A", "B", 1)
+        |> WeightedGraph.add_undirected_edge("B", "C", 2)
+        |> WeightedGraph.add_undirected_edge("A", "C", 4)
 
       # Direct path A->C costs 4, but A->B->C costs 1+2=3
       # Test traditional implementation
@@ -331,15 +331,15 @@ defmodule Algorithms.Graphs.DijkstraTest do
       #     |               |
       #     F ------------- G
       graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 4)
-        |> Graph.add_edge("A", "C", 2)
-        |> Graph.add_edge("B", "D", 1)
-        |> Graph.add_edge("C", "D", 8)
-        |> Graph.add_edge("C", "F", 10)
-        |> Graph.add_edge("D", "E", 2)
-        |> Graph.add_edge("E", "G", 3)
-        |> Graph.add_edge("F", "G", 1)
+        WeightedGraph.new()
+        |> WeightedGraph.add_edge("A", "B", 4)
+        |> WeightedGraph.add_edge("A", "C", 2)
+        |> WeightedGraph.add_edge("B", "D", 1)
+        |> WeightedGraph.add_edge("C", "D", 8)
+        |> WeightedGraph.add_edge("C", "F", 10)
+        |> WeightedGraph.add_edge("D", "E", 2)
+        |> WeightedGraph.add_edge("E", "G", 3)
+        |> WeightedGraph.add_edge("F", "G", 1)
 
       result = Dijkstra.shortest_path_tree(graph, "A")
 
@@ -397,25 +397,25 @@ defmodule Algorithms.Graphs.DijkstraTest do
     test "both implementations find equivalent optimal paths" do
       # Create equivalent graphs in both formats
       traditional_graph =
-        Graph.new()
-        |> Graph.add_edge("A", "B", 7)
-        |> Graph.add_edge("A", "C", 9)
-        |> Graph.add_edge("A", "F", 14)
-        |> Graph.add_edge("B", "A", 7)
-        |> Graph.add_edge("B", "C", 10)
-        |> Graph.add_edge("B", "D", 15)
-        |> Graph.add_edge("C", "A", 9)
-        |> Graph.add_edge("C", "B", 10)
-        |> Graph.add_edge("C", "D", 11)
-        |> Graph.add_edge("C", "F", 2)
-        |> Graph.add_edge("D", "B", 15)
-        |> Graph.add_edge("D", "C", 11)
-        |> Graph.add_edge("D", "E", 6)
-        |> Graph.add_edge("E", "D", 6)
-        |> Graph.add_edge("E", "F", 9)
-        |> Graph.add_edge("F", "A", 14)
-        |> Graph.add_edge("F", "C", 2)
-        |> Graph.add_edge("F", "E", 9)
+        WeightedGraph.new()
+        |> WeightedGraph.add_edge("A", "B", 7)
+        |> WeightedGraph.add_edge("A", "C", 9)
+        |> WeightedGraph.add_edge("A", "F", 14)
+        |> WeightedGraph.add_edge("B", "A", 7)
+        |> WeightedGraph.add_edge("B", "C", 10)
+        |> WeightedGraph.add_edge("B", "D", 15)
+        |> WeightedGraph.add_edge("C", "A", 9)
+        |> WeightedGraph.add_edge("C", "B", 10)
+        |> WeightedGraph.add_edge("C", "D", 11)
+        |> WeightedGraph.add_edge("C", "F", 2)
+        |> WeightedGraph.add_edge("D", "B", 15)
+        |> WeightedGraph.add_edge("D", "C", 11)
+        |> WeightedGraph.add_edge("D", "E", 6)
+        |> WeightedGraph.add_edge("E", "D", 6)
+        |> WeightedGraph.add_edge("E", "F", 9)
+        |> WeightedGraph.add_edge("F", "A", 14)
+        |> WeightedGraph.add_edge("F", "C", 2)
+        |> WeightedGraph.add_edge("F", "E", 9)
 
       alternative_graph = %{
         "A" => [{7, "B"}, {9, "C"}, {14, "F"}],
@@ -453,9 +453,9 @@ defmodule Algorithms.Graphs.DijkstraTest do
       center = "center"
 
       graph =
-        Enum.reduce(1..100, Graph.new(), fn i, acc ->
+        Enum.reduce(1..100, WeightedGraph.new(), fn i, acc ->
           node = "node_#{i}"
-          Graph.add_edge(acc, center, node, i)
+          WeightedGraph.add_edge(acc, center, node, i)
         end)
 
       result = Dijkstra.shortest_path_tree(graph, center)
@@ -471,12 +471,12 @@ defmodule Algorithms.Graphs.DijkstraTest do
       nodes = ["A", "B", "C", "D"]
 
       graph =
-        Enum.reduce(nodes, Graph.new(), fn from, acc1 ->
+        Enum.reduce(nodes, WeightedGraph.new(), fn from, acc1 ->
           Enum.reduce(nodes, acc1, fn to, acc2 ->
             if from != to do
               # Use sum of ASCII values as weight for deterministic results
               weight = :binary.first(from) + :binary.first(to)
-              Graph.add_edge(acc2, from, to, weight)
+              WeightedGraph.add_edge(acc2, from, to, weight)
             else
               acc2
             end
@@ -526,7 +526,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
             path
             |> Enum.chunk_every(2, 1, :discard)
             |> Enum.each(fn [from, to] ->
-              neighbors = Graph.neighbors(graph, from)
+              neighbors = WeightedGraph.neighbors(graph, from)
 
               assert Enum.any?(neighbors, fn {neighbor, _weight} -> neighbor == to end),
                      "No edge from #{from} to #{to} in path #{inspect(path)}"

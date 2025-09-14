@@ -1,5 +1,5 @@
 defmodule Algorithms.Graphs.Dijkstra do
-  alias Algorithms.Graphs.Graph
+  alias Algorithms.WeightedGraph
 
   @moduledoc """
   Two implementations of Dijkstra's algorithm for finding shortest paths in graphs.
@@ -82,14 +82,14 @@ defmodule Algorithms.Graphs.Dijkstra do
 
   ## Examples
 
-      iex> graph = Algorithms.Graph.new()
-      ...> |> Algorithms.Graphs.Graph.add_edge("A", "B", 4)
-      ...> |> Algorithms.Graphs.Graph.add_edge("A", "C", 2)
-      ...> |> Algorithms.Graphs.Graph.add_edge("B", "C", 1)
-      ...> |> Algorithms.Graphs.Graph.add_edge("B", "D", 5)
-      ...> |> Algorithms.Graphs.Graph.add_edge("C", "D", 8)
-      ...> |> Algorithms.Graphs.Graph.add_edge("C", "E", 10)
-      ...> |> Algorithms.Graphs.Graph.add_edge("D", "E", 2)
+      iex> graph = Algorithms.WeightedGraph.new()
+      ...> |> Algorithms.WeightedGraph.add_edge("A", "B", 4)
+      ...> |> Algorithms.WeightedGraph.add_edge("A", "C", 2)
+      ...> |> Algorithms.WeightedGraph.add_edge("B", "C", 1)
+      ...> |> Algorithms.WeightedGraph.add_edge("B", "D", 5)
+      ...> |> Algorithms.WeightedGraph.add_edge("C", "D", 8)
+      ...> |> Algorithms.WeightedGraph.add_edge("C", "E", 10)
+      ...> |> Algorithms.WeightedGraph.add_edge("D", "E", 2)
       iex> Algorithms.Graphs.Dijkstra.shortest_path_tree(graph, "A")
       %{
         "A" => {0, nil},
@@ -99,8 +99,8 @@ defmodule Algorithms.Graphs.Dijkstra do
         "E" => {11, "D"}
       }
   """
-  def shortest_path_tree(graph = %Graph{}, source) do
-    all_nodes = Graph.all_nodes(graph)
+  def shortest_path_tree(graph = %WeightedGraph{}, source) do
+    all_nodes = WeightedGraph.all_nodes(graph)
 
     # Initialize distances: source = 0, all others = infinity
     distances =
@@ -124,14 +124,14 @@ defmodule Algorithms.Graphs.Dijkstra do
 
   ## Examples
 
-      iex> graph = Algorithms.Graph.new()
-      ...> |> Algorithms.Graphs.Graph.add_edge("A", "B", 4)
-      ...> |> Algorithms.Graphs.Graph.add_edge("A", "C", 2)
-      ...> |> Algorithms.Graphs.Graph.add_edge("C", "B", 1)
+      iex> graph = Algorithms.WeightedGraph.new()
+      ...> |> Algorithms.WeightedGraph.add_edge("A", "B", 4)
+      ...> |> Algorithms.WeightedGraph.add_edge("A", "C", 2)
+      ...> |> Algorithms.WeightedGraph.add_edge("C", "B", 1)
       iex> Algorithms.Graphs.Dijkstra.shortest_path(graph, "A", "B")
       {:ok, {3, ["A", "C", "B"]}}
   """
-  def shortest_path(graph = %Graph{}, source, destination) do
+  def shortest_path(graph = %WeightedGraph{}, source, destination) do
     distances = shortest_path_tree(graph, source)
 
     case Map.get(distances, destination) do
@@ -159,7 +159,7 @@ defmodule Algorithms.Graphs.Dijkstra do
       new_visited = MapSet.put(visited, current_node)
 
       # Process neighbors
-      neighbors = Graph.neighbors(graph, current_node)
+      neighbors = WeightedGraph.neighbors(graph, current_node)
 
       {new_queue, new_distances} =
         process_neighbors(
