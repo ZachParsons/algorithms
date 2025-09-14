@@ -1,9 +1,9 @@
 defmodule Algorithms.Graphs.DijkstraTest do
   use ExUnit.Case
   alias Algorithms.WeightedGraph
-  alias Algorithms.Graphs.Dijkstra
   alias Algorithms.Graphs.Dijkstra.Tree
   alias Algorithms.Graphs.Dijkstra.Search
+  alias Algorithms.Graphs.NDT
 
   # Test helper functions for creating sample graphs
 
@@ -64,7 +64,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
         |> WeightedGraph.add_edge("A", "C", 2)
 
       # Test traditional implementation
-      {:ok, {traditional_cost, traditional_path}} = Dijkstra.shortest_path(graph, "A", "B")
+      {:ok, {traditional_cost, traditional_path}} = Tree.shortest_path(graph, "A", "B")
       assert traditional_cost == 4
       assert traditional_path == ["A", "B"]
 
@@ -72,7 +72,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
       alternative_graph = to_alternative_format(graph)
 
       {alternative_cost, alternative_path} =
-        Dijkstra.shortest_path_search(alternative_graph, "A", "B")
+        Search.shortest_path_search(alternative_graph, "A", "B")
 
       assert alternative_cost == 4
       assert alternative_path == ["A", "B"]
@@ -84,7 +84,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
         |> WeightedGraph.add_edge("A", "B", 4)
 
       # Test traditional implementation
-      {:ok, {traditional_cost, traditional_path}} = Dijkstra.shortest_path(graph, "A", "A")
+      {:ok, {traditional_cost, traditional_path}} = Tree.shortest_path(graph, "A", "A")
       assert traditional_cost == 0
       assert traditional_path == ["A"]
 
@@ -92,7 +92,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
       alternative_graph = to_alternative_format(graph)
 
       {alternative_cost, alternative_path} =
-        Dijkstra.shortest_path_search(alternative_graph, "A", "A")
+        Search.shortest_path_search(alternative_graph, "A", "A")
 
       assert alternative_cost == 0
       assert alternative_path == ["A"]
@@ -109,7 +109,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
       # A to D: A->B->D = 4+5 = 9, vs A->C->D = 2+8 = 10
       # Test traditional implementation
-      {:ok, {traditional_cost, traditional_path}} = Dijkstra.shortest_path(graph, "A", "D")
+      {:ok, {traditional_cost, traditional_path}} = Tree.shortest_path(graph, "A", "D")
       assert traditional_cost == 9
       assert traditional_path == ["A", "B", "D"]
 
@@ -117,7 +117,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
       alternative_graph = to_alternative_format(graph)
 
       {alternative_cost, alternative_path} =
-        Dijkstra.shortest_path_search(alternative_graph, "A", "D")
+        Search.shortest_path_search(alternative_graph, "A", "D")
 
       assert alternative_cost == 9
       assert alternative_path == ["A", "B", "D"]
@@ -136,7 +136,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
       # A to E: A->C->E = 2+10 = 12, vs A->B->D->E = 4+5+2 = 11
       # Test traditional implementation
-      {:ok, {traditional_cost, traditional_path}} = Dijkstra.shortest_path(graph, "A", "E")
+      {:ok, {traditional_cost, traditional_path}} = Tree.shortest_path(graph, "A", "E")
       assert traditional_cost == 11
       assert traditional_path == ["A", "B", "D", "E"]
 
@@ -144,7 +144,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
       alternative_graph = to_alternative_format(graph)
 
       {alternative_cost, alternative_path} =
-        Dijkstra.shortest_path_search(alternative_graph, "A", "E")
+        Search.shortest_path_search(alternative_graph, "A", "E")
 
       assert alternative_cost == 11
       assert alternative_path == ["A", "B", "D", "E"]
@@ -159,7 +159,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
         |> WeightedGraph.add_edge("A", "B", 1)
         |> WeightedGraph.add_edge("C", "D", 1)
 
-      result = Dijkstra.shortest_path(graph, "A", "C")
+      result = Tree.shortest_path(graph, "A", "C")
       assert result == {:error, :no_path}
 
       # Alternative implementation
@@ -170,7 +170,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
         :d => [{1, :c}]
       }
 
-      {cost, path} = Dijkstra.shortest_path_search(alt_graph, :a, :c)
+      {cost, path} = Search.shortest_path_search(alt_graph, :a, :c)
       assert cost == 0
       assert path == []
     end
@@ -183,12 +183,12 @@ defmodule Algorithms.Graphs.DijkstraTest do
         # Add isolated nodes
         |> WeightedGraph.add_edge("Z", "Y", 1)
 
-      result = Dijkstra.shortest_path(graph, "A", "Z")
+      result = Tree.shortest_path(graph, "A", "Z")
       assert result == {:error, :no_path}
 
       # Alternative implementation
       alt_graph = %{:a => [{1, :b}], :b => []}
-      {cost, path} = Dijkstra.shortest_path_search(alt_graph, :nonexistent, :b)
+      {cost, path} = Search.shortest_path_search(alt_graph, :nonexistent, :b)
       assert cost == 0
       assert path == []
     end
@@ -200,7 +200,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
         |> WeightedGraph.add_edge("B", "C", 5)
 
       # Test traditional implementation
-      {:ok, {traditional_cost, traditional_path}} = Dijkstra.shortest_path(graph, "A", "C")
+      {:ok, {traditional_cost, traditional_path}} = Tree.shortest_path(graph, "A", "C")
       assert traditional_cost == 5
       assert traditional_path == ["A", "B", "C"]
 
@@ -208,7 +208,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
       alternative_graph = to_alternative_format(graph)
 
       {alternative_cost, alternative_path} =
-        Dijkstra.shortest_path_search(alternative_graph, "A", "C")
+        Search.shortest_path_search(alternative_graph, "A", "C")
 
       assert alternative_cost == 5
       assert alternative_path == ["A", "B", "C"]
@@ -221,13 +221,13 @@ defmodule Algorithms.Graphs.DijkstraTest do
         |> WeightedGraph.add_edge("A", "B", 2)
 
       # Test traditional implementation
-      result = Dijkstra.shortest_path_tree(graph, "A")
+      result = Tree.shortest_path_tree(graph, "A")
       assert elem(result["A"], 0) == 0
       assert elem(result["B"], 0) == 2
 
       # Test alternative implementation
       alt_graph = to_alternative_format(graph)
-      {cost, path} = Dijkstra.shortest_path_search(alt_graph, "A", "A")
+      {cost, path} = Search.shortest_path_search(alt_graph, "A", "A")
       assert cost == 0
       assert path == ["A"]
     end
@@ -242,14 +242,14 @@ defmodule Algorithms.Graphs.DijkstraTest do
         |> WeightedGraph.add_edge("A", "B", 10)
 
       # Test traditional implementation
-      {:ok, {traditional_cost, _traditional_path}} = Dijkstra.shortest_path(graph, "A", "B")
+      {:ok, {traditional_cost, _traditional_path}} = Tree.shortest_path(graph, "A", "B")
       assert traditional_cost == 2
 
       # Test alternative implementation
       alternative_graph = to_alternative_format(graph)
 
       {alternative_cost, _alternative_path} =
-        Dijkstra.shortest_path_search(alternative_graph, "A", "B")
+        Search.shortest_path_search(alternative_graph, "A", "B")
 
       assert alternative_cost == 2
     end
@@ -257,17 +257,17 @@ defmodule Algorithms.Graphs.DijkstraTest do
     test "handles single node graph" do
       # Traditional implementation
       single_graph = WeightedGraph.new() |> WeightedGraph.add_edge("A", "A", 0)
-      result = Dijkstra.shortest_path_tree(single_graph, "A")
+      result = Tree.shortest_path_tree(single_graph, "A")
       assert result["A"] == {0, nil}
 
       # Alternative implementation
-      {cost, path} = Dijkstra.shortest_path_search(%{:a => []}, :a, :a)
+      {cost, path} = Search.shortest_path_search(%{:a => []}, :a, :a)
       assert cost == 0
       assert path == [:a]
     end
 
     test "handles empty graph" do
-      {cost, path} = Dijkstra.shortest_path_search(%{}, :a, :b)
+      {cost, path} = Search.shortest_path_search(%{}, :a, :b)
       assert cost == 0
       assert path == []
     end
@@ -282,7 +282,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
         :d => []
       }
 
-      {cost, path} = Dijkstra.shortest_path_search(graph, :a, :d)
+      {cost, path} = Search.shortest_path_search(graph, :a, :d)
       # a->b->c->d = 1+1+1 = 3, vs a->c->d = 4+1 = 5
       assert cost == 3
       assert path == [:a, :b, :c, :d]
@@ -299,7 +299,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
       # Direct path A->C costs 4, but A->B->C costs 1+2=3
       # Test traditional implementation
-      {:ok, {traditional_cost, traditional_path}} = Dijkstra.shortest_path(graph, "A", "C")
+      {:ok, {traditional_cost, traditional_path}} = Tree.shortest_path(graph, "A", "C")
       assert traditional_cost == 3
       assert traditional_path == ["A", "B", "C"]
 
@@ -307,15 +307,15 @@ defmodule Algorithms.Graphs.DijkstraTest do
       alternative_graph = to_alternative_format(graph)
 
       {alternative_cost, alternative_path} =
-        Dijkstra.shortest_path_search(alternative_graph, "A", "C")
+        Search.shortest_path_search(alternative_graph, "A", "C")
 
       assert alternative_cost == 3
       assert alternative_path == ["A", "B", "C"]
 
       # Test bidirectionality
       graph_ud = sample_undirected_graph()
-      {:ok, {distance_ab, _}} = Dijkstra.shortest_path(graph_ud, "A", "B")
-      {:ok, {distance_ba, _}} = Dijkstra.shortest_path(graph_ud, "B", "A")
+      {:ok, {distance_ab, _}} = Tree.shortest_path(graph_ud, "A", "B")
+      {:ok, {distance_ba, _}} = Tree.shortest_path(graph_ud, "B", "A")
       assert distance_ab == distance_ba
     end
   end
@@ -343,7 +343,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
         |> WeightedGraph.add_edge("E", "G", 3)
         |> WeightedGraph.add_edge("F", "G", 1)
 
-      result = Dijkstra.shortest_path_tree(graph, "A")
+      result = Tree.shortest_path_tree(graph, "A")
 
       # Verify distances
       # A to A: 0
@@ -373,7 +373,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
     test "works with alternative graph format and original Erlang test case" do
       graph = sample_graph_alternative()
-      {cost, path} = Dijkstra.shortest_path_search(graph, :a, :e)
+      {cost, path} = Search.shortest_path_search(graph, :a, :e)
 
       assert cost == 20
       assert path == [:a, :c, :f, :e]
@@ -388,7 +388,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
         "D" => []
       }
 
-      {cost, path} = Dijkstra.shortest_path_search(graph, "A", "D")
+      {cost, path} = Search.shortest_path_search(graph, "A", "D")
       # A->B->D = 5+3 = 8, vs A->C->D = 10+1 = 11, vs A->B->C->D = 5+2+1 = 8
       assert cost == 8
       assert path in [["A", "B", "D"], ["A", "B", "C", "D"]]
@@ -438,10 +438,10 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
       for {source, dest} <- test_pairs do
         {:ok, {traditional_cost, _traditional_path}} =
-          Dijkstra.shortest_path(traditional_graph, source, dest)
+          Tree.shortest_path(traditional_graph, source, dest)
 
         {alternative_cost, _alternative_path} =
-          Dijkstra.shortest_path_search(alternative_graph, source, dest)
+          Search.shortest_path_search(alternative_graph, source, dest)
 
         assert traditional_cost == alternative_cost,
                "Cost mismatch for #{source}->#{dest}: traditional=#{traditional_cost}, alternative=#{alternative_cost}"
@@ -460,7 +460,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
           WeightedGraph.add_edge(acc, center, node, i)
         end)
 
-      result = Dijkstra.shortest_path_tree(graph, center)
+      result = Tree.shortest_path_tree(graph, center)
 
       # Should find paths to all 101 nodes (center + 100 others)
       assert map_size(result) == 101
@@ -485,7 +485,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
           end)
         end)
 
-      result = Dijkstra.shortest_path_tree(graph, "A")
+      result = Tree.shortest_path_tree(graph, "A")
 
       # Should find paths to all nodes
       assert map_size(result) == 4
@@ -496,7 +496,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
   describe "Property-based validation" do
     test "shortest path distance is never negative" do
       graph = sample_graph()
-      result = Dijkstra.shortest_path_tree(graph, "A")
+      result = Tree.shortest_path_tree(graph, "A")
 
       for {_node, {distance, _prev}} <- result do
         assert distance == :infinity or distance >= 0
@@ -515,7 +515,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
       ]
 
       for {source, dest} <- test_pairs do
-        case Dijkstra.shortest_path(graph, source, dest) do
+        case Tree.shortest_path(graph, source, dest) do
           {:ok, {_distance, path}} ->
             # Path should start with source and end with destination
             assert List.first(path) == source
@@ -548,8 +548,8 @@ defmodule Algorithms.Graphs.DijkstraTest do
       nodes = ["A", "B", "C", "D", "E"]
 
       for a <- nodes, b <- nodes, c <- nodes, a != b and b != c and a != c do
-        case {Dijkstra.shortest_path(graph, a, b), Dijkstra.shortest_path(graph, b, c),
-              Dijkstra.shortest_path(graph, a, c)} do
+        case {Tree.shortest_path(graph, a, b), Tree.shortest_path(graph, b, c),
+              Tree.shortest_path(graph, a, c)} do
           {{:ok, {dist_ab, _}}, {:ok, {dist_bc, _}}, {:ok, {dist_ac, _}}} ->
             assert dist_ac <= dist_ab + dist_bc,
                    "Triangle inequality violated: #{a}->#{c} (#{dist_ac}) > #{a}->#{b} (#{dist_ab}) + #{b}->#{c} (#{dist_bc})"
@@ -559,85 +559,6 @@ defmodule Algorithms.Graphs.DijkstraTest do
             :ok
         end
       end
-    end
-  end
-
-  # Network Delay Time problem solver
-  # Returns the minimum time for all n nodes to receive the signal from source node k
-  # Returns -1 if it's impossible for all nodes to receive the signal
-  defp network_delay_time(times, n, k) do
-    # Build weighted adjacency list from times
-    graph =
-      Enum.reduce(times, %{}, fn %{source: from, target: to, weight: time}, acc ->
-        neighbors = Map.get(acc, from, [])
-        Map.put(acc, from, [{to, time} | neighbors])
-      end)
-
-    # Run Dijkstra's algorithm from source node k
-    distances = dijkstra_shortest_paths(graph, k)
-
-    # Check if all nodes (1 to n) are reachable
-    all_nodes = 1..n |> Enum.to_list()
-
-    reachable_distances =
-      Enum.map(all_nodes, fn node ->
-        Map.get(distances, node, :infinity)
-      end)
-
-    # If any node is unreachable, return -1
-    if Enum.any?(reachable_distances, &(&1 == :infinity)) do
-      -1
-    else
-      # Return the maximum time (when the last node receives the signal)
-      Enum.max(reachable_distances)
-    end
-  end
-
-  # Dijkstra's algorithm implementation for network delay time problem
-  defp dijkstra_shortest_paths(graph, source) do
-    # Initialize distances: source = 0, all others = infinity
-    distances = %{source => 0}
-
-    # Priority queue: list of {distance, node} tuples
-    queue = [{0, source}]
-    visited = MapSet.new()
-
-    dijkstra_loop_network(graph, queue, distances, visited)
-  end
-
-  defp dijkstra_loop_network(_graph, [], distances, _visited), do: distances
-
-  defp dijkstra_loop_network(graph, queue, distances, visited) do
-    # Sort queue by distance and take the minimum
-    [{current_distance, current_node} | rest_queue] = Enum.sort(queue)
-
-    # Skip if already visited
-    if MapSet.member?(visited, current_node) do
-      dijkstra_loop_network(graph, rest_queue, distances, visited)
-    else
-      # Mark as visited
-      new_visited = MapSet.put(visited, current_node)
-
-      # Process neighbors
-      neighbors = Map.get(graph, current_node, [])
-
-      {new_queue, new_distances} =
-        Enum.reduce(neighbors, {rest_queue, distances}, fn {neighbor, weight},
-                                                           {acc_queue, acc_distances} ->
-          new_distance = current_distance + weight
-          current_neighbor_distance = Map.get(acc_distances, neighbor, :infinity)
-
-          # If we found a shorter path, update it
-          if new_distance < current_neighbor_distance do
-            updated_distances = Map.put(acc_distances, neighbor, new_distance)
-            updated_queue = [{new_distance, neighbor} | acc_queue]
-            {updated_queue, updated_distances}
-          else
-            {acc_queue, acc_distances}
-          end
-        end)
-
-      dijkstra_loop_network(graph, new_queue, new_distances, new_visited)
     end
   end
 
@@ -709,21 +630,21 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
       n = 4
       k = 2
-      assert 2 = network_delay_time(times, n, k)
+      assert 2 = NDT.network_delay_time(times, n, k)
 
       # Example 2: times = [[1,2,1]], n = 2, k = 1
       # Expected: 1 (signal takes 1 time unit to reach node 2)
       times = [%{source: 1, target: 2, weight: 1}]
       n = 2
       k = 1
-      assert 1 = network_delay_time(times, n, k)
+      assert 1 = NDT.network_delay_time(times, n, k)
 
       # Example 3: times = [[1,2,1]], n = 2, k = 2
       # Expected: -1 (node 2 cannot reach node 1, so not all nodes receive signal)
       times = [%{source: 1, target: 2, weight: 1}]
       n = 2
       k = 2
-      assert -1 = network_delay_time(times, n, k)
+      assert -1 = NDT.network_delay_time(times, n, k)
     end
   end
 end
