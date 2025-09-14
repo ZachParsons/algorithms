@@ -2,6 +2,8 @@ defmodule Algorithms.Graphs.DijkstraTest do
   use ExUnit.Case
   alias Algorithms.WeightedGraph
   alias Algorithms.Graphs.Dijkstra
+  alias Algorithms.Graphs.Dijkstra.Tree
+  alias Algorithms.Graphs.Dijkstra.Search
 
   # Test helper functions for creating sample graphs
 
@@ -54,7 +56,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
     end)
   end
 
-  describe "Shortest path algorithms - basic functionality" do
+  describe "Tree Implementation - Basic functionality" do
     test "finds path to adjacent node" do
       graph =
         WeightedGraph.new()
@@ -149,7 +151,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
     end
   end
 
-  describe "Shortest path algorithms - edge cases" do
+  describe "Tree Implementation - Edge cases" do
     test "handles disconnected graphs" do
       # Traditional implementation
       graph =
@@ -287,7 +289,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
     end
   end
 
-  describe "Shortest path algorithms - undirected graphs" do
+  describe "Tree Implementation - Undirected graphs" do
     test "works with undirected graphs" do
       graph =
         WeightedGraph.new()
@@ -318,7 +320,7 @@ defmodule Algorithms.Graphs.DijkstraTest do
     end
   end
 
-  describe "Shortest path algorithms - comprehensive scenarios" do
+  describe "Tree Implementation - Comprehensive scenarios" do
     test "finds shortest paths from source to all nodes" do
       # Create a sample graph:
       #     A --4-- B
@@ -557,6 +559,171 @@ defmodule Algorithms.Graphs.DijkstraTest do
             :ok
         end
       end
+    end
+  end
+
+  # Network Delay Time problem solver
+  # Returns the minimum time for all n nodes to receive the signal from source node k
+  # Returns -1 if it's impossible for all nodes to receive the signal
+  defp network_delay_time(times, n, k) do
+    # Build weighted adjacency list from times
+    graph =
+      Enum.reduce(times, %{}, fn %{source: from, target: to, weight: time}, acc ->
+        neighbors = Map.get(acc, from, [])
+        Map.put(acc, from, [{to, time} | neighbors])
+      end)
+
+    # Run Dijkstra's algorithm from source node k
+    distances = dijkstra_shortest_paths(graph, k)
+
+    # Check if all nodes (1 to n) are reachable
+    all_nodes = 1..n |> Enum.to_list()
+
+    reachable_distances =
+      Enum.map(all_nodes, fn node ->
+        Map.get(distances, node, :infinity)
+      end)
+
+    # If any node is unreachable, return -1
+    if Enum.any?(reachable_distances, &(&1 == :infinity)) do
+      -1
+    else
+      # Return the maximum time (when the last node receives the signal)
+      Enum.max(reachable_distances)
+    end
+  end
+
+  # Dijkstra's algorithm implementation for network delay time problem
+  defp dijkstra_shortest_paths(graph, source) do
+    # Initialize distances: source = 0, all others = infinity
+    distances = %{source => 0}
+
+    # Priority queue: list of {distance, node} tuples
+    queue = [{0, source}]
+    visited = MapSet.new()
+
+    dijkstra_loop_network(graph, queue, distances, visited)
+  end
+
+  defp dijkstra_loop_network(_graph, [], distances, _visited), do: distances
+
+  defp dijkstra_loop_network(graph, queue, distances, visited) do
+    # Sort queue by distance and take the minimum
+    [{current_distance, current_node} | rest_queue] = Enum.sort(queue)
+
+    # Skip if already visited
+    if MapSet.member?(visited, current_node) do
+      dijkstra_loop_network(graph, rest_queue, distances, visited)
+    else
+      # Mark as visited
+      new_visited = MapSet.put(visited, current_node)
+
+      # Process neighbors
+      neighbors = Map.get(graph, current_node, [])
+
+      {new_queue, new_distances} =
+        Enum.reduce(neighbors, {rest_queue, distances}, fn {neighbor, weight},
+                                                           {acc_queue, acc_distances} ->
+          new_distance = current_distance + weight
+          current_neighbor_distance = Map.get(acc_distances, neighbor, :infinity)
+
+          # If we found a shorter path, update it
+          if new_distance < current_neighbor_distance do
+            updated_distances = Map.put(acc_distances, neighbor, new_distance)
+            updated_queue = [{new_distance, neighbor} | acc_queue]
+            {updated_queue, updated_distances}
+          else
+            {acc_queue, acc_distances}
+          end
+        end)
+
+      dijkstra_loop_network(graph, new_queue, new_distances, new_visited)
+    end
+  end
+
+  describe "Search Implementation" do
+    test "shortest_path_search with simple graph" do
+      # Simple test case: A -> B -> C
+      graph = %{
+        :a => [{5, :b}, {10, :c}],
+        :b => [{2, :c}],
+        :c => []
+      }
+
+      {cost, path} = Search.shortest_path_search(graph, :a, :c)
+      # Best path should be A -> B -> C = 5 + 2 = 7 (better than direct A -> C = 10)
+      assert cost == 7
+      assert path == [:a, :b, :c]
+    end
+
+    test "shortest_path_search with no path" do
+      graph = %{
+        :a => [{1, :b}],
+        :b => [],
+        :c => [{1, :d}],
+        :d => []
+      }
+
+      {cost, path} = Search.shortest_path_search(graph, :a, :c)
+      assert cost == 0
+      assert path == []
+    end
+
+    test "shortest_path_search to same node" do
+      graph = %{:a => [{1, :b}], :b => []}
+
+      {cost, path} = Search.shortest_path_search(graph, :a, :a)
+      assert cost == 0
+      assert path == [:a]
+    end
+  end
+
+  describe "Tree Implementation Direct Tests" do
+    test "shortest_path_tree direct call" do
+      graph = sample_graph()
+      result = Tree.shortest_path_tree(graph, "A")
+
+      assert result["A"] == {0, nil}
+      assert result["B"] == {4, "A"}
+      assert result["C"] == {2, "A"}
+    end
+
+    test "shortest_path direct call" do
+      graph = sample_graph()
+      {:ok, {distance, path}} = Tree.shortest_path(graph, "A", "E")
+
+      assert distance == 11
+      assert path == ["A", "B", "D", "E"]
+    end
+  end
+
+  describe "Network Delay Time Problem" do
+    test "network delay time" do
+      # Example 1: times = [[2,1,1],[2,3,1],[3,4,1]], n = 4, k = 2
+      # Expected: 2 (max time for signal to reach all nodes)
+      times = [
+        %{source: 2, target: 1, weight: 1},
+        %{source: 2, target: 3, weight: 1},
+        %{source: 3, target: 4, weight: 1}
+      ]
+
+      n = 4
+      k = 2
+      assert 2 = network_delay_time(times, n, k)
+
+      # Example 2: times = [[1,2,1]], n = 2, k = 1
+      # Expected: 1 (signal takes 1 time unit to reach node 2)
+      times = [%{source: 1, target: 2, weight: 1}]
+      n = 2
+      k = 1
+      assert 1 = network_delay_time(times, n, k)
+
+      # Example 3: times = [[1,2,1]], n = 2, k = 2
+      # Expected: -1 (node 2 cannot reach node 1, so not all nodes receive signal)
+      times = [%{source: 1, target: 2, weight: 1}]
+      n = 2
+      k = 2
+      assert -1 = network_delay_time(times, n, k)
     end
   end
 end
