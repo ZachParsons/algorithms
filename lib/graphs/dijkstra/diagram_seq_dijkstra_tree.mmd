@@ -1,0 +1,129 @@
+sequenceDiagram
+    participant Client
+    participant Tree as Tree.shortest_path
+    participant TreeImpl as Tree.shortest_path_tree
+    participant WeightedGraph as WeightedGraph
+    participant DijkstraLoop as dijkstra_loop
+    participant ProcessNeighbors as process_neighbors
+    participant ReconstructPath as reconstruct_path
+
+    Note over Client, ReconstructPath: Tree-Based Dijkstra Implementation with Test Values<br/>Graph: WeightedGraph with A->B(4), A->C(2), B->C(1), B->D(5), C->D(8)<br/>Query: shortest_path(graph, "A", "D")
+
+    %% Initial call from test
+    Client->>+Tree: shortest_path(graph, "A", "D")
+    Note over Tree: Entry point - finds shortest path between two specific nodes
+    
+    %% Build complete shortest path tree
+    Tree->>+TreeImpl: shortest_path_tree(graph, "A")
+    Note over TreeImpl: Building complete shortest path tree from source "A"
+    
+    %% Get all nodes from graph
+    TreeImpl->>+WeightedGraph: all_nodes(graph)
+    WeightedGraph-->>-TreeImpl: ["A", "B", "C", "D"]
+    
+    %% Initialize distances map
+    Note over TreeImpl: Initialize distances:<br/>%{<br/>  "A" => {0, nil},<br/>  "B" => {:infinity, nil},<br/>  "C" => {:infinity, nil},<br/>  "D" => {:infinity, nil}<br/>}
+    
+    Note over TreeImpl: Initialize priority queue: [{0, "A"}]<br/>Initialize visited set: MapSet.new()
+    
+    %% Start main Dijkstra loop
+    TreeImpl->>+DijkstraLoop: dijkstra_loop(graph, [{0, "A"}], distances, MapSet.new())
+    
+    %% ========== ITERATION 1: Process node "A" ==========
+    Note over DijkstraLoop: **ITERATION 1: Process "A"**<br/>Sort queue: [{0, "A"}]<br/>Extract minimum: {0, "A"}<br/>Mark "A" as visited
+    
+    DijkstraLoop->>+WeightedGraph: neighbors(graph, "A")
+    WeightedGraph-->>-DijkstraLoop: [{"C", 2}, {"B", 4}]
+    
+    DijkstraLoop->>+ProcessNeighbors: process_neighbors([{"C", 2}, {"B", 4}], "A", 0, [], distances, visited)
+    
+    Note over ProcessNeighbors: **Process neighbor "C":**<br/>current_distance + weight = 0 + 2 = 2<br/>2 < :infinity ✓ Better path found!<br/>Update: distances["C"] = {2, "A"}<br/>Add to queue: {2, "C"}
+    
+    Note over ProcessNeighbors: **Process neighbor "B":**<br/>current_distance + weight = 0 + 4 = 4<br/>4 < :infinity ✓ Better path found!<br/>Update: distances["B"] = {4, "A"}<br/>Add to queue: {4, "B"}
+    
+    ProcessNeighbors-->>-DijkstraLoop: Return: {[{4, "B"}, {2, "C"}], updated_distances}
+    
+    %% ========== ITERATION 2: Process node "C" ==========
+    DijkstraLoop->>+DijkstraLoop: dijkstra_loop(graph, [{2, "C"}, {4, "B"}], distances, visited)
+    
+    Note over DijkstraLoop: **ITERATION 2: Process "C"**<br/>Sort queue: [{2, "C"}, {4, "B"}]<br/>Extract minimum: {2, "C"}<br/>Mark "C" as visited
+    
+    DijkstraLoop->>+WeightedGraph: neighbors(graph, "C")
+    WeightedGraph-->>-DijkstraLoop: [{"D", 8}]
+    
+    DijkstraLoop->>+ProcessNeighbors: process_neighbors([{"D", 8}], "C", 2, [{4, "B"}], distances, visited)
+    
+    Note over ProcessNeighbors: **Process neighbor "D":**<br/>current_distance + weight = 2 + 8 = 10<br/>10 < :infinity ✓ First path to D!<br/>Update: distances["D"] = {10, "C"}<br/>Add to queue: {10, "D"}
+    
+    ProcessNeighbors-->>-DijkstraLoop: Return: {[{10, "D"}, {4, "B"}], updated_distances}
+    
+    %% ========== ITERATION 3: Process node "B" ==========
+    DijkstraLoop->>+DijkstraLoop: dijkstra_loop(graph, [{4, "B"}, {10, "D"}], distances, visited)
+    
+    Note over DijkstraLoop: **ITERATION 3: Process "B"**<br/>Sort queue: [{4, "B"}, {10, "D"}]<br/>Extract minimum: {4, "B"}<br/>Mark "B" as visited
+    
+    DijkstraLoop->>+WeightedGraph: neighbors(graph, "B")
+    WeightedGraph-->>-DijkstraLoop: [{"D", 5}, {"C", 1}]
+    
+    DijkstraLoop->>+ProcessNeighbors: process_neighbors([{"D", 5}, {"C", 1}], "B", 4, [{10, "D"}], distances, visited)
+    
+    Note over ProcessNeighbors: **Process neighbor "D":**<br/>current_distance + weight = 4 + 5 = 9<br/>9 < 10 (current) ✓ BETTER PATH!<br/>Update: distances["D"] = {9, "B"}<br/>Add to queue: {9, "D"}
+    
+    Note over ProcessNeighbors: **Process neighbor "C":**<br/>"C" already visited - SKIP
+    
+    ProcessNeighbors-->>-DijkstraLoop: Return: {[{9, "D"}, {10, "D"}], updated_distances}
+    
+    %% ========== ITERATION 4: Process node "D" (distance 9) ==========
+    DijkstraLoop->>+DijkstraLoop: dijkstra_loop(graph, [{9, "D"}, {10, "D"}], distances, visited)
+    
+    Note over DijkstraLoop: **ITERATION 4: Process "D"**<br/>Sort queue: [{9, "D"}, {10, "D"}]<br/>Extract minimum: {9, "D"}<br/>Mark "D" as visited
+    
+    DijkstraLoop->>+WeightedGraph: neighbors(graph, "D")
+    WeightedGraph-->>-DijkstraLoop: []
+    
+    DijkstraLoop->>+ProcessNeighbors: process_neighbors([], "D", 9, [{10, "D"}], distances, visited)
+    ProcessNeighbors-->>-DijkstraLoop: Return: {[{10, "D"}], distances}
+    
+    %% ========== ITERATION 5: Skip duplicate "D" ==========
+    DijkstraLoop->>+DijkstraLoop: dijkstra_loop(graph, [{10, "D"}], distances, visited)
+    
+    Note over DijkstraLoop: **ITERATION 5: Skip duplicate**<br/>Extract: {10, "D"}<br/>"D" already visited - SKIP
+    
+    %% ========== FINAL: Empty queue ==========
+    DijkstraLoop->>+DijkstraLoop: dijkstra_loop(graph, [], distances, visited)
+    
+    Note over DijkstraLoop: **ALGORITHM COMPLETE**<br/>Queue is empty - return final distances
+    
+    DijkstraLoop-->>-DijkstraLoop: final_distances
+    DijkstraLoop-->>-DijkstraLoop: final_distances
+    DijkstraLoop-->>-DijkstraLoop: final_distances
+    DijkstraLoop-->>-DijkstraLoop: final_distances
+    DijkstraLoop-->>-TreeImpl: %{<br/>  "A" => {0, nil},<br/>  "B" => {4, "A"},<br/>  "C" => {2, "A"},<br/>  "D" => {9, "B"}<br/>}
+    
+    %% Return tree to shortest_path
+    TreeImpl-->>-Tree: distances_map
+    
+    %% Extract target distance and reconstruct path
+    Note over Tree: Extract distance to "D": {9, "B"}<br/>Distance ≠ :infinity ✓ Path exists!
+    
+    Tree->>+ReconstructPath: reconstruct_path(distances, "A", "D")
+    ReconstructPath->>+ReconstructPath: build_path(distances, "D", ["D"], "A")
+    
+    Note over ReconstructPath: **Path Reconstruction:**<br/>Current: "D", Path: ["D"]<br/>Get previous of "D": "B"<br/>"B" ≠ "A", continue...
+    
+    ReconstructPath->>+ReconstructPath: build_path(distances, "B", ["B", "D"], "A")
+    
+    Note over ReconstructPath: Current: "B", Path: ["B", "D"]<br/>Get previous of "B": "A"<br/>"A" = "A" ✓ Reached source!
+    
+    ReconstructPath->>+ReconstructPath: build_path(distances, "A", ["A", "B", "D"], "A")
+    
+    Note over ReconstructPath: Current == source, return complete path
+    
+    ReconstructPath-->>-ReconstructPath: ["A", "B", "D"]
+    ReconstructPath-->>-ReconstructPath: ["A", "B", "D"]
+    ReconstructPath-->>-Tree: ["A", "B", "D"]
+    
+    %% Final result
+    Tree-->>-Client: {:ok, {9, ["A", "B", "D"]}}
+    
+    Note over Client: **FINAL RESULT**<br/>Status: :ok<br/>Distance: 9 (A->B: 4 + B->D: 5)<br/>Path: ["A", "B", "D"]<br/><br/>**Algorithm verified optimal path:**<br/>A->B->D (cost 9) < A->C->D (cost 10)

@@ -1,0 +1,103 @@
+sequenceDiagram
+    participant Client
+    participant Search as Search.shortest_path_search
+    participant SearchImpl as do_shortest_path_search
+    participant GraphLookup as Map.get(graph, node)
+
+    Note over Client, GraphLookup: Search-Based Dijkstra Implementation with Test Values<br/>Graph: %{:a => [{7, :b}, {9, :c}, {14, :f}], :b => [{7, :a}, {10, :c}, {15, :d}], :c => [{10, :b}, {9, :a}, {11, :d}, {2, :f}]}<br/>Query: shortest_path_search(graph, :a, :e) - from sample_graph_alternative()
+
+    %% Initial call from test
+    Client->>+Search: shortest_path_search(graph, :a, :e)
+    Note over Search: Entry point - path-based search with early termination<br/>Initialize routes: [{0, [:a]}]<br/>Initialize visited: %{}
+    
+    %% Start recursive search implementation
+    Search->>+SearchImpl: do_shortest_path_search(graph, [{0, [:a]}], :e, %{})
+    
+    %% ========== ITERATION 1: Process node :a ==========
+    Note over SearchImpl: **ITERATION 1: Process :a**<br/>Routes: [{0, [:a]}]<br/>Extract first route: {0, [:a]}<br/>Current node: :a, Target: :e (not reached yet)
+    
+    SearchImpl->>+GraphLookup: Map.get(graph, :a, [])
+    GraphLookup-->>-SearchImpl: [{7, :b}, {9, :c}, {14, :f}]
+    
+    Note over SearchImpl: **Build new routes for unvisited neighbors:**<br/>For {7, :b}: :b not visited ✓<br/>  → {0 + 7, [:b | [:a]]} = {7, [:b, :a]}<br/>For {9, :c}: :c not visited ✓<br/>  → {0 + 9, [:c | [:a]]} = {9, [:c, :a]}<br/>For {14, :f}: :f not visited ✓<br/>  → {0 + 14, [:f | [:a]]} = {14, [:f, :a]}
+    
+    Note over SearchImpl: **Update state:**<br/>Mark :a as visited: %{:a => true}<br/>New routes: [{7, [:b, :a]}, {9, [:c, :a]}, {14, [:f, :a]}]<br/>Sort by cost: [{7, [:b, :a]}, {9, [:c, :a]}, {14, [:f, :a]}]
+    
+    SearchImpl->>+SearchImpl: do_shortest_path_search(graph, [{7, [:b, :a]}, {9, [:c, :a]}, {14, [:f, :a]}], :e, %{:a => true})
+    
+    %% ========== ITERATION 2: Process node :b ==========
+    Note over SearchImpl: **ITERATION 2: Process :b**<br/>Routes: [{7, [:b, :a]}, {9, [:c, :a]}, {14, [:f, :a]}]<br/>Extract first route: {7, [:b, :a]}<br/>Current node: :b, Target: :e (not reached yet)
+    
+    SearchImpl->>+GraphLookup: Map.get(graph, :b, [])
+    GraphLookup-->>-SearchImpl: [{7, :a}, {10, :c}, {15, :d}]
+    
+    Note over SearchImpl: **Build new routes for unvisited neighbors:**<br/>For {7, :a}: :a already visited ✗ SKIP<br/>For {10, :c}: :c not visited ✓<br/>  → {7 + 10, [:c | [:b, :a]]} = {17, [:c, :b, :a]}<br/>For {15, :d}: :d not visited ✓<br/>  → {7 + 15, [:d | [:b, :a]]} = {22, [:d, :b, :a]}
+    
+    Note over SearchImpl: **Update state:**<br/>Mark :b as visited: %{:a => true, :b => true}<br/>Combine routes: [{9, [:c, :a]}, {14, [:f, :a]}, {17, [:c, :b, :a]}, {22, [:d, :b, :a]}]<br/>Sort by cost: [{9, [:c, :a]}, {14, [:f, :a]}, {17, [:c, :b, :a]}, {22, [:d, :b, :a]}]
+    
+    SearchImpl->>+SearchImpl: do_shortest_path_search(graph, [{9, [:c, :a]}, {14, [:f, :a]}, {17, [:c, :b, :a]}, {22, [:d, :b, :a]}], :e, %{:a => true, :b => true})
+    
+    %% ========== ITERATION 3: Process node :c ==========
+    Note over SearchImpl: **ITERATION 3: Process :c**<br/>Routes: [{9, [:c, :a]}, {14, [:f, :a]}, {17, [:c, :b, :a]}, {22, [:d, :b, :a]}]<br/>Extract first route: {9, [:c, :a]}<br/>Current node: :c, Target: :e (not reached yet)
+    
+    SearchImpl->>+GraphLookup: Map.get(graph, :c, [])
+    GraphLookup-->>-SearchImpl: [{10, :b}, {9, :a}, {11, :d}, {2, :f}]
+    
+    Note over SearchImpl: **Build new routes for unvisited neighbors:**<br/>For {10, :b}: :b already visited ✗ SKIP<br/>For {9, :a}: :a already visited ✗ SKIP<br/>For {11, :d}: :d not visited ✓<br/>  → {9 + 11, [:d | [:c, :a]]} = {20, [:d, :c, :a]}<br/>For {2, :f}: :f not visited ✓<br/>  → {9 + 2, [:f | [:c, :a]]} = {11, [:f, :c, :a]}
+    
+    Note over SearchImpl: **Update state:**<br/>Mark :c as visited: %{:a => true, :b => true, :c => true}<br/>Combine routes: [{14, [:f, :a]}, {17, [:c, :b, :a]}, {22, [:d, :b, :a]}, {20, [:d, :c, :a]}, {11, [:f, :c, :a]}]<br/>Sort by cost: [{11, [:f, :c, :a]}, {14, [:f, :a]}, {17, [:c, :b, :a]}, {20, [:d, :c, :a]}, {22, [:d, :b, :a]}]
+    
+    SearchImpl->>+SearchImpl: do_shortest_path_search(graph, [{11, [:f, :c, :a]}, {14, [:f, :a]}, {17, [:c, :b, :a]}, {20, [:d, :c, :a]}, {22, [:d, :b, :a]}], :e, %{:a => true, :b => true, :c => true})
+    
+    %% ========== ITERATION 4: Process node :f ==========
+    Note over SearchImpl: **ITERATION 4: Process :f**<br/>Routes: [{11, [:f, :c, :a]}, {14, [:f, :a]}, ...]<br/>Extract first route: {11, [:f, :c, :a]}<br/>Current node: :f, Target: :e (not reached yet)
+    
+    SearchImpl->>+GraphLookup: Map.get(graph, :f, [])
+    GraphLookup-->>-SearchImpl: [{14, :a}, {2, :c}, {9, :e}]
+    
+    Note over SearchImpl: **Build new routes for unvisited neighbors:**<br/>For {14, :a}: :a already visited ✗ SKIP<br/>For {2, :c}: :c already visited ✗ SKIP<br/>For {9, :e}: :e not visited ✓ TARGET NODE!<br/>  → {11 + 9, [:e | [:f, :c, :a]]} = {20, [:e, :f, :c, :a]}
+    
+    Note over SearchImpl: **Update state:**<br/>Mark :f as visited: %{:a => true, :b => true, :c => true, :f => true}<br/>Combine routes: [{14, [:f, :a]}, {17, [:c, :b, :a]}, {20, [:d, :c, :a]}, {22, [:d, :b, :a]}, {20, [:e, :f, :c, :a]}]<br/>Sort by cost: [{14, [:f, :a]}, {17, [:c, :b, :a]}, {20, [:d, :c, :a]}, {20, [:e, :f, :c, :a]}, {22, [:d, :b, :a]}]
+    
+    SearchImpl->>+SearchImpl: do_shortest_path_search(graph, [{14, [:f, :a]}, {17, [:c, :b, :a]}, {20, [:d, :c, :a]}, {20, [:e, :f, :c, :a]}, {22, [:d, :b, :a]}], :e, %{:a => true, :b => true, :c => true, :f => true})
+    
+    %% ========== ITERATION 5: Process another :f ==========
+    Note over SearchImpl: **ITERATION 5: Process :f (alternate path)**<br/>Routes: [{14, [:f, :a]}, {17, [:c, :b, :a]}, {20, [:d, :c, :a]}, {20, [:e, :f, :c, :a]}, {22, [:d, :b, :a]}]<br/>Extract first route: {14, [:f, :a]}<br/>Current node: :f, Target: :e (not reached yet)
+    
+    Note over SearchImpl: **:f already visited - continue to next route**
+    
+    SearchImpl->>+SearchImpl: do_shortest_path_search(graph, [{17, [:c, :b, :a]}, {20, [:d, :c, :a]}, {20, [:e, :f, :c, :a]}, {22, [:d, :b, :a]}], :e, visited)
+    
+    %% ========== ITERATION 6: Process :c (alternate path) ==========
+    Note over SearchImpl: **ITERATION 6: Process :c (alternate path)**<br/>Extract: {17, [:c, :b, :a]}<br/>:c already visited - continue to next route
+    
+    SearchImpl->>+SearchImpl: do_shortest_path_search(graph, [{20, [:d, :c, :a]}, {20, [:e, :f, :c, :a]}, {22, [:d, :b, :a]}], :e, visited)
+    
+    %% ========== ITERATION 7: Process :d ==========
+    Note over SearchImpl: **ITERATION 7: Process :d**<br/>Routes: [{20, [:d, :c, :a]}, {20, [:e, :f, :c, :a]}, {22, [:d, :b, :a]}]<br/>Extract first route: {20, [:d, :c, :a]}<br/>Current node: :d, Target: :e (not reached yet)
+    
+    SearchImpl->>+GraphLookup: Map.get(graph, :d, [])
+    GraphLookup-->>-SearchImpl: [{15, :b}, {6, :e}, {11, :c}]
+    
+    Note over SearchImpl: **Build new routes for unvisited neighbors:**<br/>For {15, :b}: :b already visited ✗ SKIP<br/>For {6, :e}: :e not visited ✓ TARGET NODE!<br/>  → {20 + 6, [:e | [:d, :c, :a]]} = {26, [:e, :d, :c, :a]}<br/>For {11, :c}: :c already visited ✗ SKIP
+    
+    SearchImpl->>+SearchImpl: do_shortest_path_search(graph, [{20, [:e, :f, :c, :a]}, {22, [:d, :b, :a]}, {26, [:e, :d, :c, :a]}], :e, visited)
+    
+    %% ========== ITERATION 8: TARGET FOUND! ==========
+    Note over SearchImpl: **ITERATION 8: TARGET REACHED!**<br/>Routes: [{20, [:e, :f, :c, :a]}, {22, [:d, :b, :a]}, {26, [:e, :d, :c, :a]}]<br/>Extract first route: {20, [:e, :f, :c, :a]}<br/>Current node: :e, Target: :e ✓ **MATCH FOUND!**
+    
+    Note over SearchImpl: **EARLY TERMINATION ACTIVATED!**<br/>Target reached with optimal cost!<br/>Path: [:e, :f, :c, :a]<br/>Reverse for correct order: [:a, :c, :f, :e]<br/>Cost: 20
+    
+    SearchImpl-->>-SearchImpl: {20, [:a, :c, :f, :e]}
+    SearchImpl-->>-SearchImpl: {20, [:a, :c, :f, :e]}
+    SearchImpl-->>-SearchImpl: {20, [:a, :c, :f, :e]}
+    SearchImpl-->>-SearchImpl: {20, [:a, :c, :f, :e]}
+    SearchImpl-->>-SearchImpl: {20, [:a, :c, :f, :e]}
+    SearchImpl-->>-SearchImpl: {20, [:a, :c, :f, :e]}
+    SearchImpl-->>-SearchImpl: {20, [:a, :c, :f, :e]}
+    SearchImpl-->>-Search: {20, [:a, :c, :f, :e]}
+    
+    %% Final result
+    Search-->>-Client: {20, [:a, :c, :f, :e]}
+    
+    Note over Client: **FINAL RESULT**<br/>Cost: 20<br/>Path: [:a, :c, :f, :e]<br/>Route breakdown: :a→:c(9) + :c→:f(2) + :f→:e(9) = 20<br/><br/>**Early Termination Benefit:**<br/>✓ Found optimal path without exploring all possibilities<br/>✓ Avoided processing remaining routes: {22, [:d, :b, :a]}, {26, [:e, :d, :c, :a]}<br/>✓ More efficient than building complete shortest path tree
