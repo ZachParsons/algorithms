@@ -32,6 +32,51 @@ defmodule Algorithms.WeightedGraph do
   end
 
   @doc """
+  Adds multiple directed edges in one call.
+
+  Accepts a list of {from, to, weight} tuples and adds each edge to the graph.
+
+  ## Examples
+
+      iex> graph = Algorithms.WeightedGraph.new()
+      ...> |> Algorithms.WeightedGraph.add_edges([
+      ...>   {"A", "B", 4},
+      ...>   {"A", "C", 2},
+      ...>   {"B", "D", 5}
+      ...> ])
+      iex> Algorithms.WeightedGraph.neighbors(graph, "A")
+      [{"C", 2}, {"B", 4}]
+  """
+  def add_edges(graph, edges) when is_list(edges) do
+    Enum.reduce(edges, graph, fn {from, to, weight}, acc ->
+      add_edge(acc, from, to, weight)
+    end)
+  end
+
+  @doc """
+  Adds multiple undirected edges in one call.
+
+  Accepts a list of {from, to, weight} tuples and adds each edge bidirectionally.
+
+  ## Examples
+
+      iex> graph = Algorithms.WeightedGraph.new()
+      ...> |> Algorithms.WeightedGraph.add_undirected_edges([
+      ...>   {"A", "B", 4},
+      ...>   {"B", "C", 2},
+      ...>   {"A", "C", 3}
+      ...> ])
+      iex> neighbors_a = Algorithms.WeightedGraph.neighbors(graph, "A")
+      iex> Enum.sort(neighbors_a)
+      [{"B", 4}, {"C", 3}]
+  """
+  def add_undirected_edges(graph, edges) when is_list(edges) do
+    Enum.reduce(edges, graph, fn {from, to, weight}, acc ->
+      add_undirected_edge(acc, from, to, weight)
+    end)
+  end
+
+  @doc """
   Gets all neighbors of a node.
   """
   def neighbors(%__MODULE__{nodes: nodes}, node) do
