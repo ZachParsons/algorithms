@@ -343,14 +343,15 @@ defmodule Algorithms.Graphs.DijkstraTest do
       n_1 = 4
       k_1 = 2
 
-      # Use helper to solve with Tree implementation
-      result_1 = solve_ndt_with_tree(times_1, n_1, k_1)
+      # Step 1: Translate NDT format to Tree input format
+      graph_1 = times_to_weighted_graph(times_1, n_1)
+      # Step 2: Call regular Tree function
+      distances_1 = Tree.shortest_path_tree(graph_1, k_1)
+      # Step 3: Extract result from Tree output
+      result_1 = calculate_max_delay_from_tree(distances_1, n_1)
       assert result_1 == 2
 
       # Verify the underlying Tree shortest_path_tree works correctly
-      graph_1 = times_to_weighted_graph(times_1, n_1)
-      distances_1 = Tree.shortest_path_tree(graph_1, k_1)
-
       # Check individual distances from source node 2
       # Source to itself
       assert elem(distances_1[2], 0) == 0
@@ -366,7 +367,12 @@ defmodule Algorithms.Graphs.DijkstraTest do
       n_2 = 2
       k_2 = 1
 
-      result_2 = solve_ndt_with_tree(times_2, n_2, k_2)
+      # Step 1: Translate NDT format to Tree input format
+      graph_2 = times_to_weighted_graph(times_2, n_2)
+      # Step 2: Call regular Tree function
+      distances_2 = Tree.shortest_path_tree(graph_2, k_2)
+      # Step 3: Extract result from Tree output
+      result_2 = calculate_max_delay_from_tree(distances_2, n_2)
       assert result_2 == 1
 
       # Test case 3: Unreachable node scenario
@@ -375,7 +381,12 @@ defmodule Algorithms.Graphs.DijkstraTest do
       # Starting from node 2, but node 1 is unreachable
       k_3 = 2
 
-      result_3 = solve_ndt_with_tree(times_3, n_3, k_3)
+      # Step 1: Translate NDT format to Tree input format
+      graph_3 = times_to_weighted_graph(times_3, n_3)
+      # Step 2: Call regular Tree function
+      distances_3 = Tree.shortest_path_tree(graph_3, k_3)
+      # Step 3: Extract result from Tree output
+      result_3 = calculate_max_delay_from_tree(distances_3, n_3)
       assert result_3 == -1
     end
   end
@@ -731,71 +742,10 @@ defmodule Algorithms.Graphs.DijkstraTest do
                "Cost mismatch for #{source}->#{dest}: traditional=#{traditional_cost}, alternative=#{alternative_cost}"
       end
     end
-
-    test "Tree implementation validates correctly using translation functions" do
-      # Test multiple NDT scenarios using the translation functions to validate Tree implementation
-      test_cases = [
-        # Case 1: Linear network delay
-        {
-          [
-            %{source: 2, target: 1, weight: 1},
-            %{source: 2, target: 3, weight: 1},
-            %{source: 3, target: 4, weight: 1}
-          ],
-          4,
-          2,
-          2
-        },
-        # Case 2: Simple two-node
-        {
-          [%{source: 1, target: 2, weight: 1}],
-          2,
-          1,
-          1
-        },
-        # Case 3: Unreachable scenario
-        {
-          [%{source: 1, target: 2, weight: 1}],
-          2,
-          2,
-          -1
-        },
-        # Case 4: More complex network
-        {
-          [
-            %{source: 1, target: 2, weight: 1},
-            %{source: 1, target: 3, weight: 4},
-            %{source: 2, target: 3, weight: 2},
-            %{source: 3, target: 4, weight: 1}
-          ],
-          4,
-          1,
-          4
-        }
-      ]
-
-      for {times, n, k, expected} <- test_cases do
-        # Test using our helper function (Tree implementation with translation)
-        tree_result = solve_ndt_with_tree(times, n, k)
-
-        # Validate that Tree implementation produces expected result
-        assert tree_result == expected,
-               "Tree result mismatch for case #{inspect({times, n, k})}: got #{tree_result}, expected #{expected}"
-
-        # Additional validation: verify the underlying shortest_path_tree works correctly
-        graph = times_to_weighted_graph(times, n)
-        distances = Tree.shortest_path_tree(graph, k)
-        calculated_delay = calculate_max_delay_from_tree(distances, n)
-
-        # Ensure our helper components work consistently
-        assert calculated_delay == tree_result,
-               "Helper component mismatch for case #{inspect({times, n, k})}: calculated=#{calculated_delay}, tree=#{tree_result}"
-      end
-    end
   end
 
-  describe "Network Delay Time Problem" do
-    test "network delay time using Tree implementation helpers" do
+  describe "Problem: Network Delay Time" do
+    test "network delay time using Tree implementation with explicit translation" do
       # Example 1: times = [[2,1,1],[2,3,1],[3,4,1]], n = 4, k = 2
       # Expected: 2 (max time for signal to reach all nodes)
       times = [
@@ -806,21 +756,42 @@ defmodule Algorithms.Graphs.DijkstraTest do
 
       n = 4
       k = 2
-      assert 2 = solve_ndt_with_tree(times, n, k)
+
+      # Step 1: Translate NDT format to Tree input format
+      graph = times_to_weighted_graph(times, n)
+      # Step 2: Call regular Tree function
+      distances = Tree.shortest_path_tree(graph, k)
+      # Step 3: Extract result from Tree output
+      result = calculate_max_delay_from_tree(distances, n)
+      assert result == 2
 
       # Example 2: times = [[1,2,1]], n = 2, k = 1
       # Expected: 1 (signal takes 1 time unit to reach node 2)
       times = [%{source: 1, target: 2, weight: 1}]
       n = 2
       k = 1
-      assert 1 = solve_ndt_with_tree(times, n, k)
+
+      # Step 1: Translate NDT format to Tree input format
+      graph = times_to_weighted_graph(times, n)
+      # Step 2: Call regular Tree function
+      distances = Tree.shortest_path_tree(graph, k)
+      # Step 3: Extract result from Tree output
+      result = calculate_max_delay_from_tree(distances, n)
+      assert result == 1
 
       # Example 3: times = [[1,2,1]], n = 2, k = 2
       # Expected: -1 (node 2 cannot reach node 1, so not all nodes receive signal)
       times = [%{source: 1, target: 2, weight: 1}]
       n = 2
       k = 2
-      assert -1 = solve_ndt_with_tree(times, n, k)
+
+      # Step 1: Translate NDT format to Tree input format
+      graph = times_to_weighted_graph(times, n)
+      # Step 2: Call regular Tree function
+      distances = Tree.shortest_path_tree(graph, k)
+      # Step 3: Extract result from Tree output
+      result = calculate_max_delay_from_tree(distances, n)
+      assert result == -1
     end
   end
 
@@ -873,17 +844,5 @@ defmodule Algorithms.Graphs.DijkstraTest do
       # Return maximum time (when the last node receives the signal)
       Enum.max(node_distances)
     end
-  end
-
-  # Helper to solve NDT problem using Tree implementation directly (for validation)
-  defp solve_ndt_with_tree(times, n, k) do
-    # Transform input to WeightedGraph format
-    graph = times_to_weighted_graph(times, n)
-
-    # Use Tree implementation to get distances to all nodes
-    distances = Tree.shortest_path_tree(graph, k)
-
-    # Extract and validate results
-    calculate_max_delay_from_tree(distances, n)
   end
 end
