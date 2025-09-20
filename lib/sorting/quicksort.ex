@@ -1,4 +1,4 @@
-defmodule Algorithms.Quicksort do
+defmodule Algorithms.Sorting.Quicksort do
   @moduledoc """
   Quicksort is a divide-and-conquer algorithm that works by selecting a 'pivot' element
   from the array and partitioning the other elements into two sub-arrays according to

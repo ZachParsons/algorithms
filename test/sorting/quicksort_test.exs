@@ -1,6 +1,6 @@
-defmodule Algorithms.QuicksortTest do
+defmodule Algorithms.Sorting.QuicksortTest do
   use ExUnit.Case
-  alias Algorithms.Quicksort
+  alias Algorithms.Sorting.Quicksort
 
   describe "sort/1" do
     test "sorts an empty list" do
