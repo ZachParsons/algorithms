@@ -1,6 +1,6 @@
-defmodule Algorithms.CombinationsTest do
+defmodule Algorithms.Combinatorics.CombinationsTest do
   use ExUnit.Case
-  alias Algorithms.Combinations
+  alias Algorithms.Combinatorics.Combinations
 
   test "success: 4, 2" do
     assert [

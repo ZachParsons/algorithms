@@ -1,6 +1,6 @@
-defmodule Algorithms.PermutationsTest do
+defmodule Algorithms.Combinatorics.PermutationsTest do
   use ExUnit.Case
-  alias Algorithms.Permutations
+  alias Algorithms.Combinatorics.Permutations
 
   test "success: 3 elements" do
     assert [

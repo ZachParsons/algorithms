@@ -1,4 +1,4 @@
-defmodule Algorithms.Combinations do
+defmodule Algorithms.Combinatorics.Combinations do
   @moduledoc false
   def run(elements, size)
       when is_list(elements) and

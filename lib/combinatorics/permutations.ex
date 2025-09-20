@@ -1,5 +1,8 @@
-defmodule Algorithms.Permutations do
-  @moduledoc false
+defmodule Algorithms.Combinatorics.Permutations do
+  @moduledoc """
+  A permutation is a specific type of combination where order matters.
+  """
+
   def run(elements) when not is_list(elements), do: "invalid input"
   def run([]), do: [[]]
 
