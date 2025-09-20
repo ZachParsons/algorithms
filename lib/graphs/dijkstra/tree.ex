@@ -60,7 +60,7 @@ defmodule Algorithms.Graphs.Dijkstra.Tree do
       ...> |> Algorithms.WeightedGraph.add_edge("C", "D", 8)
       ...> |> Algorithms.WeightedGraph.add_edge("C", "E", 10)
       ...> |> Algorithms.WeightedGraph.add_edge("D", "E", 2)
-      iex> Algorithms.Graphs.Dijkstra.TreeBased.shortest_path_tree(graph, "A")
+      iex> Algorithms.Graphs.Dijkstra.Tree.shortest_path_tree(graph, "A")
       %{
         "A" => {0, nil},
         "B" => {4, "A"},
@@ -98,7 +98,7 @@ defmodule Algorithms.Graphs.Dijkstra.Tree do
       ...> |> Algorithms.WeightedGraph.add_edge("A", "B", 4)
       ...> |> Algorithms.WeightedGraph.add_edge("A", "C", 2)
       ...> |> Algorithms.WeightedGraph.add_edge("C", "B", 1)
-      iex> Algorithms.Graphs.Dijkstra.TreeBased.shortest_path(graph, "A", "B")
+      iex> Algorithms.Graphs.Dijkstra.Tree.shortest_path(graph, "A", "B")
       {:ok, {3, ["A", "C", "B"]}}
   """
   def shortest_path(graph = %WeightedGraph{}, source, target) do

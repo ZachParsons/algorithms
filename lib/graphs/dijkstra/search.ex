@@ -56,7 +56,7 @@ defmodule Algorithms.Graphs.Dijkstra.Search do
       ...>   :e => [{9, :f}, {6, :d}],
       ...>   :f => [{14, :a}, {2, :c}, {9, :e}]
       ...> }
-      iex> Algorithms.Graphs.Dijkstra.SearchBased.shortest_path_search(graph, :a, :e)
+      iex> Algorithms.Graphs.Dijkstra.Search.shortest_path_search(graph, :a, :e)
       {20, [:a, :c, :f, :e]}
   """
   def shortest_path_search(graph, start, target) when is_map(graph) do
