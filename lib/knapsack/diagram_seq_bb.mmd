@@ -1,0 +1,86 @@
+sequenceDiagram
+    participant Client
+    participant BB as BranchAndBound
+    participant RR as run_recursive
+    participant CB as calculate_bound
+
+    Note over Client,CB: Branch and Bound Knapsack Algorithm
+    Note over Client,CB: Example: items=[{60,10}, {100,20}, {120,30}], capacity=50
+
+    Client->>+BB: run(items: list, capacity: int)
+    Note right of BB: items = [{60,10}, {100,20}, {120,30}]<br/>capacity = 50
+
+    BB->>BB: indexed_items = Enum.with_index(items)
+    Note right of BB: indexed_items = [{{60,10},0}, {{100,20},1}, {{120,30},2}]
+
+    BB->>BB: initial_state = %{<br/>  best_value: 0,<br/>  best_solution: [],<br/>  remaining_capacity: 50,<br/>  current_value: 0,<br/>  current_solution: []<br/>}
+
+    BB->>+RR: run_recursive(indexed_items, current_idx: 0, state)
+    Note right of RR: current_idx = 0<br/>state = %{best_value: 0, remaining_capacity: 50, ...}
+
+    RR->>RR: {current_item, idx} = Enum.at(items, 0)
+    Note right of RR: current_item = {60,10}, idx = 0
+
+    RR->>+CB: calculate_bound(items, start_idx: 0, remaining_capacity: 50, current_value: 0)
+    Note right of CB: Calculates fractional knapsack upper bound
+    CB->>CB: Enum.drop(items, 0) |> Enum.sort_by(value/weight, :desc)
+    CB->>CB: Reduce items: take whole items + fraction if needed
+    CB-->>-RR: bound: float (e.g., 220.0)
+
+    RR->>RR: bound > best_value && capacity >= weight?
+    Note right of RR: 220.0 > 0 && 50 >= 10 → true
+
+    RR->>RR: include_state = %{<br/>  remaining_capacity: 40,<br/>  current_value: 60,<br/>  current_solution: [0]<br/>}
+
+    RR->>+RR: run_recursive(items, current_idx: 1, include_state)
+    Note right of RR: Explore "include item 0" branch
+    
+    RR->>+CB: calculate_bound(items, start_idx: 1, remaining_capacity: 40, current_value: 60)
+    CB-->>-RR: bound: float
+
+    RR->>+RR: run_recursive(items, current_idx: 2, new_include_state)
+    Note right of RR: Continue recursion...
+    
+    RR->>+CB: calculate_bound(items, start_idx: 2, remaining_capacity: 20, current_value: 160)
+    CB-->>-RR: bound: float
+
+    RR->>+RR: run_recursive(items, current_idx: 3, final_state)
+    Note right of RR: current_idx >= length(items) → base case
+    RR->>RR: Update best if current > best
+    RR-->>-RR: updated_state
+
+    RR-->>-RR: include_result from item 2
+    RR-->>-RR: include_result from item 1
+    
+    RR->>+RR: run_recursive(items, current_idx: 1, exclude_state)
+    Note right of RR: Explore "exclude item 0" branch
+    
+    RR->>+CB: calculate_bound(items, start_idx: 1, remaining_capacity: 50, current_value: 0)
+    CB-->>-RR: bound: float
+
+    RR->>+RR: run_recursive(items, current_idx: 2, exclude_include_state)
+    Note right of RR: Include item 1 in exclude branch
+    
+    RR->>+CB: calculate_bound(items, start_idx: 2, remaining_capacity: 30, current_value: 100)
+    CB-->>-RR: bound: float
+
+    RR->>+RR: run_recursive(items, current_idx: 3, final_exclude_include_state)
+    RR-->>-RR: final_state
+
+    RR-->>-RR: exclude_include_result
+    
+    RR->>+RR: run_recursive(items, current_idx: 2, exclude_exclude_state)
+    Note right of RR: Exclude item 1 in exclude branch
+    RR-->>-RR: exclude_exclude_result
+
+    RR->>RR: max(include_result, exclude_result)
+    RR-->>-RR: best_result
+
+    RR-->>-BB: final_state = %{<br/>  best_value: 220,<br/>  best_solution: [2, 1]<br/>}
+
+    BB->>BB: Enum.sort(best_solution)
+    Note right of BB: [2, 1] → [1, 2]
+
+    BB-->>-Client: {220, [1, 2]}
+
+    Note over Client,CB: Returns optimal value and sorted item indices

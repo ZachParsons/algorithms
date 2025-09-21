@@ -1,0 +1,81 @@
+sequenceDiagram
+    participant Client
+    participant DP as DynamicProgramming
+    participant CDT as create_dp_table
+    participant BS as backtrack_solution
+    participant BR as backtrack_recursive
+
+    Note over Client,BR: Dynamic Programming Knapsack Algorithm
+    Note over Client,BR: Example: items=[{60,10}, {100,20}, {120,30}], capacity=50
+
+    Client->>+DP: run(items: list, capacity: int)
+    Note right of DP: items = [{60,10}, {100,20}, {120,30}]<br/>capacity = 50
+
+    DP->>DP: n = length(items)
+    Note right of DP: n = 3
+
+    DP->>+CDT: create_dp_table(items, capacity: 50)
+    Note right of CDT: Build 2D DP table dp[i][w]
+
+    CDT->>CDT: Initialize dp_table: %{<br/>  0 => %{0..50 => 0},<br/>  1 => %{0..50 => 0},<br/>  2 => %{0..50 => 0},<br/>  3 => %{0..50 => 0}<br/>}
+
+    CDT->>CDT: items |> Enum.with_index()
+    Note right of CDT: [{{60,10}, 0}, {{100,20}, 1}, {{120,30}, 2}]
+
+    loop For each item (item_idx = 0..2)
+        CDT->>CDT: i = item_idx + 1
+        Note right of CDT: DP table uses 1-based indexing for items
+
+        loop For each weight w = 0..capacity
+            CDT->>CDT: cond do<br/>  w == 0 → table[i][w] = 0<br/>  item.weight > w → table[i][w] = table[i-1][w]<br/>  true → calculate max
+            
+            Note right of CDT: For item {60,10} at i=1:<br/>w=0: dp[1][0] = 0<br/>w=1..9: dp[1][w] = 0 (item too heavy)<br/>w=10..50: dp[1][w] = max(0, 0+60) = 60
+
+            CDT->>CDT: include_value = table[i-1][w-weight] + value<br/>exclude_value = table[i-1][w]<br/>table[i][w] = max(include, exclude)
+        end
+    end
+
+    Note right of CDT: Final DP table built:<br/>dp[0][*] = 0 (base case)<br/>dp[1][10..50] = 60 (item 0)<br/>dp[2][20..50] = 100, dp[2][30..50] = 160<br/>dp[3][50] = 220 (optimal)
+
+    CDT-->>-DP: dp_table: %{i => %{w => value}}
+
+    DP->>DP: max_value = dp_table[n][capacity]
+    Note right of DP: max_value = dp_table[3][50] = 220
+
+    DP->>+BS: backtrack_solution(dp_table, items, n: 3, capacity: 50)
+
+    BS->>+BR: backtrack_recursive(dp_table, items, i: 3, w: 50, selected: [])
+    Note right of BR: Start backtracking from dp[3][50]
+
+    BR->>BR: current_value = dp_table[3][50] = 220<br/>previous_value = dp_table[2][50] = 160
+    Note right of BR: 220 ≠ 160, so item 2 was selected
+
+    BR->>BR: item = Enum.at(items, 2) = {120,30}<br/>item_index = 2
+    Note right of BR: Add item 2 to selection
+
+    BR->>+BR: backtrack_recursive(dp_table, items, i: 2, w: 20, selected: [2])
+    Note right of BR: Move to dp[2][20] after taking item 2
+
+    BR->>BR: current_value = dp_table[2][20] = 100<br/>previous_value = dp_table[1][20] = 60
+    Note right of BR: 100 ≠ 60, so item 1 was selected
+
+    BR->>BR: item = Enum.at(items, 1) = {100,20}<br/>item_index = 1
+    Note right of BR: Add item 1 to selection
+
+    BR->>+BR: backtrack_recursive(dp_table, items, i: 1, w: 0, selected: [1, 2])
+    Note right of BR: Move to dp[1][0] after taking item 1
+
+    BR->>BR: w == 0 → return selected
+    BR-->>-BR: selected: [1, 2]
+
+    BR-->>-BR: selected: [1, 2]
+    BR-->>-BS: selected: [1, 2]
+
+    BS-->>-DP: selected_items: [1, 2]
+
+    DP->>DP: Enum.sort(selected_items)
+    Note right of DP: [1, 2] → [1, 2] (already sorted)
+
+    DP-->>-Client: {220, [1, 2]}
+
+    Note over Client,BR: Returns optimal value and sorted item indices<br/>DP table approach guarantees optimal solution
