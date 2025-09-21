@@ -1,4 +1,4 @@
-defmodule Algorithms.Knapsack do
+defmodule Algorithms.Knapsack.BranchAndBound do
   @moduledoc """
   Branch and Bound solution for the 0/1 Knapsack Problem.
 
@@ -47,7 +47,7 @@ defmodule Algorithms.Knapsack do
         %{value: 120, weight: 30}
       ]
 
-      Knapsack.branch_and_bound(items, 50)
+      Knapsack.run(items, 50)
       # Returns: {220, [1, 2]} - optimal value 220 with items at indices 1,2
 
   ## Time Complexity
@@ -61,10 +61,10 @@ defmodule Algorithms.Knapsack do
   - **Tight bound**: Close to actual optimal value
   - **Easy to implement**: Standard greedy fractional knapsack
   """
-  def branch_and_bound(_items = [], _capacity), do: {0, []}
-  def branch_and_bound(_items, _capacity = 0), do: {0, []}
+  def run(_items = [], _capacity), do: {0, []}
+  def run(_items, _capacity = 0), do: {0, []}
 
-  def branch_and_bound(items, capacity) do
+  def run(items, capacity) do
     # Add indices to items
     indexed_items = Enum.with_index(items)
 
@@ -78,13 +78,13 @@ defmodule Algorithms.Knapsack do
     }
 
     # Start recursive search
-    final_state = branch_and_bound_recursive(indexed_items, 0, initial_state)
+    final_state = run_recursive(indexed_items, 0, initial_state)
 
     # Return result in original order
     {final_state.best_value, Enum.sort(final_state.best_solution)}
   end
 
-  defp branch_and_bound_recursive(items, current_idx, state) when current_idx >= length(items) do
+  defp run_recursive(items, current_idx, state) when current_idx >= length(items) do
     # Update best solution if current is better
     if state.current_value > state.best_value do
       %{state | best_value: state.current_value, best_solution: state.current_solution}
@@ -93,7 +93,7 @@ defmodule Algorithms.Knapsack do
     end
   end
 
-  defp branch_and_bound_recursive(items, current_idx, state) do
+  defp run_recursive(items, current_idx, state) do
     {current_item, idx} = Enum.at(items, current_idx)
     bound = calculate_bound(items, current_idx, state.remaining_capacity, state.current_value)
 
@@ -108,8 +108,8 @@ defmodule Algorithms.Knapsack do
       }
 
       # Recursively explore both branches and take best result
-      include_result = branch_and_bound_recursive(items, current_idx + 1, include_state)
-      exclude_result = branch_and_bound_recursive(items, current_idx + 1, state)
+      include_result = run_recursive(items, current_idx + 1, include_state)
+      exclude_result = run_recursive(items, current_idx + 1, state)
 
       if include_result.best_value > exclude_result.best_value do
         include_result
@@ -118,7 +118,7 @@ defmodule Algorithms.Knapsack do
       end
     else
       # Skip this item and continue with next
-      branch_and_bound_recursive(items, current_idx + 1, state)
+      run_recursive(items, current_idx + 1, state)
     end
   end
 

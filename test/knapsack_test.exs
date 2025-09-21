@@ -1,9 +1,10 @@
 defmodule Algorithms.KnapsackTest do
   use ExUnit.Case
-  alias Algorithms.Knapsack
+  alias Algorithms.Knapsack.BranchAndBound, as: BB
+  alias Algorithms.Knapsack.DP
 
   describe "branch_and_bound/2" do
-    test "solves basic knapsack problem" do
+    test "runs basic knapsack problem" do
       items = [
         %{value: 60, weight: 10},
         %{value: 100, weight: 20},
@@ -12,21 +13,26 @@ defmodule Algorithms.KnapsackTest do
 
       capacity = 50
 
-      assert Knapsack.branch_and_bound(items, capacity) == {
-               # optimal value
-               220,
-               # selected items (indices)
-               [
-                 # item with value 100, weight 20
-                 1,
-                 # item with value 120, weight 30
-                 2
-               ]
-             }
+      expected_result = {
+        # optimal value
+        220,
+        # selected items (indices)
+        [
+          # item with value 100, weight 20
+          1,
+          # item with value 120, weight 30
+          2
+        ]
+      }
+
+      assert expected_result == BB.run(items, capacity)
+      assert expected_result == DP.run(items, capacity)
     end
 
     test "handles empty item list" do
-      assert Knapsack.branch_and_bound([], 50) == {0, []}
+      expected_result = {0, []}
+      assert expected_result == BB.run([], 50)
+      assert expected_result == DP.run([], 50)
     end
 
     test "handles zero capacity" do
@@ -35,10 +41,12 @@ defmodule Algorithms.KnapsackTest do
         %{value: 100, weight: 20}
       ]
 
-      assert Knapsack.branch_and_bound(items, 0) == {0, []}
+      expected_result = {0, []}
+      assert expected_result == BB.run(items, 0)
+      assert expected_result == DP.run(items, 0)
     end
 
-    test "solves problem with items of equal value but different weights" do
+    test "runs problem with items of equal value but different weights" do
       items = [
         %{value: 100, weight: 20},
         %{value: 100, weight: 10},
@@ -47,17 +55,14 @@ defmodule Algorithms.KnapsackTest do
 
       capacity = 30
 
-      assert Knapsack.branch_and_bound(items, capacity) == {
-               # optimal value
-               200,
-               # selected items (indices)
-               [
-                 # item with value 100, weight 10
-                 1,
-                 # item with value 100, weight 15
-                 2
-               ]
-             }
+      assert {200, bb_indices} = BB.run(items, capacity)
+      assert {200, dp_indices} = DP.run(items, capacity)
+
+      # # Verify both solutions are valid (different algorithms may choose different optimal solutions)
+      # # Both should be valid optimal solutions (could be [0,1] or [1,2])
+      valid_solutions = [[0, 1], [1, 2]]
+      assert bb_indices in valid_solutions
+      assert dp_indices in valid_solutions
     end
 
     test "handles larger problem efficiently" do
@@ -73,19 +78,22 @@ defmodule Algorithms.KnapsackTest do
 
       capacity = 80
 
-      assert Knapsack.branch_and_bound(items, capacity) == {
-               # optimal value
-               440,
-               # selected items (indices)
-               [
-                 # item with value 80, weight 15
-                 3,
-                 # item with value 200, weight 40
-                 4,
-                 # item with value 160, weight 25
-                 5
-               ]
-             }
+      expected_result = {
+        # optimal value
+        440,
+        # selected items (indices)
+        [
+          # item with value 80, weight 15
+          3,
+          # item with value 200, weight 40
+          4,
+          # item with value 160, weight 25
+          5
+        ]
+      }
+
+      assert expected_result == BB.run(items, capacity)
+      assert expected_result == DP.run(items, capacity)
     end
 
     test "all items exceed capacity individually" do
@@ -96,8 +104,9 @@ defmodule Algorithms.KnapsackTest do
       ]
 
       capacity = 20
-
-      assert Knapsack.branch_and_bound(items, capacity) == {0, []}
+      expected_result = {0, []}
+      assert expected_result == BB.run(items, capacity)
+      assert expected_result == DP.run(items, capacity)
     end
   end
 end
