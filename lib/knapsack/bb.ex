@@ -60,6 +60,23 @@ defmodule Algorithms.Knapsack.BranchAndBound do
   - **Fast to compute**: O(n log n) for sorting
   - **Tight bound**: Close to actual optimal value
   - **Easy to implement**: Standard greedy fractional knapsack
+
+  Mnemonic:
+
+  input: list(map)
+  intermediate: list(tuple), map
+  output: tuple
+
+  Base: items array → indexed items with state map
+  Main recursion: binary decision tree (include/exclude)
+    If: item fits capacity AND bound > best
+      Branch 1: include item → update state → recurse
+      Branch 2: exclude item → keep state → recurse
+      Compare: take better result
+    Else: prune branch → skip to next item
+  Bound calculation: sort remaining by ratio → fractional fill
+  Leaf case: all items processed → update global best
+  Output: optimal value + selected indices array
   """
   def run(_items = [], _capacity), do: {0, []}
   def run(_items, _capacity = 0), do: {0, []}

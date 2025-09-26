@@ -68,6 +68,19 @@ defmodule Algorithms.Graphs.Dijkstra.Tree do
         "D" => {9, "B"},
         "E" => {11, "D"}
       }
+
+  Mnemonic:
+
+  Base: graph → distance map {node: {dist, prev}} + priority queue
+  Initialize: source distance=0, all others=infinity + visited set
+  Main loop: while queue not empty
+    Pop: minimum distance node from sorted queue
+    If: already visited → skip to next
+    Else: mark visited + process neighbors
+      For: each unvisited neighbor
+        If: new path shorter → update distance + add to queue
+  Backtrack: follow previous pointers to reconstruct paths
+  Output: complete distance map to all reachable nodes
   """
   def shortest_path_tree(graph = %WeightedGraph{}, source) do
     all_nodes = WeightedGraph.all_nodes(graph)

@@ -58,6 +58,21 @@ defmodule Algorithms.Graphs.Dijkstra.Search do
       ...> }
       iex> Algorithms.Graphs.Dijkstra.Search.shortest_path_search(graph, :a, :e)
       {20, [:a, :c, :f, :e]}
+
+
+  Mnemonic:
+
+  Base: graph map → priority queue with {cost, path} tuples
+  Initialize: queue with {0, [start]} + empty visited map
+  Main recursion: process lowest cost path first
+    Base case 1: empty queue → no path found
+    Base case 2: reached target → return path
+    Recursive case: expand current node
+      For: each unvisited neighbor
+        Add: {total_cost, extended_path} to queue
+      Sort: queue by cost (priority order)
+      Mark: current node as visited → recurse
+  Output: {total_cost, complete_path}
   """
   def shortest_path_search(graph, start, target) when is_map(graph) do
     do_shortest_path_search(graph, [{0, [start]}], target, %{})

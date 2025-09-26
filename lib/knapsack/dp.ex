@@ -35,6 +35,24 @@ defmodule Algorithms.Knapsack.DP do
 
       DynamicProgramming.run(items, 50)
       # Returns: {220, [1, 2]} - optimal value 220 with items at indices 1,2
+
+
+  Mnemonic:
+
+  input: list(map)
+  intermediate: map(map)
+  output: tuple
+  
+  Base: items array → 2D table dp[item][capacity]
+  Initialize: fill table with zeros (base cases)
+  Nested loops: for each item i, for each capacity w
+    If: item fits capacity
+      Max: include (prev[w-weight] + value) vs exclude (prev[w])
+    Else: copy previous row value (item doesn't fit)
+  Backtrack: trace optimal path through filled table
+    If: current == previous → item not selected
+    Else: item selected → move diagonally back
+  Output: max value + selected indices array
   """
 
   @doc """
