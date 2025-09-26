@@ -1,5 +1,11 @@
 defmodule Algorithms.Factorial do
-  @moduledoc false
+  @moduledoc """
+  Mnemonic:
+
+  Two clauses
+    0 -> 1
+    Reduce *2
+  """
   # Enumeration reduce
   def run(0), do: 1
 

@@ -3,6 +3,12 @@ defmodule Algorithms.Sorting.Quicksort do
   Quicksort is a divide-and-conquer algorithm that works by selecting a 'pivot' element
   from the array and partitioning the other elements into two sub-arrays according to
   whether they are less than or greater than the pivot.
+
+  Mnemonic:
+    Two clauses
+    Pick first element as pivot
+    Split remaining: smaller left, bigger right
+    Sort each side, sandwich pivot between
   """
 
   @doc """

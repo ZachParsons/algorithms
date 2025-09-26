@@ -1,5 +1,10 @@
 defmodule Algorithms.FizzBuzz do
-  @moduledoc false
+  @moduledoc """
+  Mnemonic:
+
+  4 clauses
+  Remainders of 15, 5, 3
+  """
 
   def run(n) when not is_integer(n) or n <= 0, do: "Invalid input"
 
