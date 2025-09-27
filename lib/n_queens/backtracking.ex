@@ -5,6 +5,17 @@ defmodule Algorithms.NQueens.Backtracking do
   Given an integer n, return all distinct solutions to the n-queens puzzle. You may return the answer in any order.
 
   Each solution contains a distinct board configuration of the n-queens' placement, where 'Q' and '.' both indicate a queen and an empty space, respectively.
+
+  ## Mnemonic
+
+  Data Flow: n → positions list → solutions list → MapSet → formatted boards
+  Iteration: solve(row=0..n) → reduce(col=0..n-1) → recurse deeper
+    Guard clause: row==n → collect solution
+    Reduce loop: test each column position
+  Decision Logic: safe? → branch execution
+    True: [{row,col}|positions] → solve(row+1)
+    False: skip column → continue reduce
+    Format: positions → MapSet lookup → board strings
   """
 
   def run(n) do
