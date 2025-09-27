@@ -42,7 +42,7 @@ defmodule Algorithms.Knapsack.DP do
   input: list(map)
   intermediate: map(map)
   output: tuple
-  
+
   Base: items array → 2D table dp[item][capacity]
   Initialize: fill table with zeros (base cases)
   Nested loops: for each item i, for each capacity w
