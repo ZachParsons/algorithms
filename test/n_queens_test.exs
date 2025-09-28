@@ -12,10 +12,12 @@ defmodule Algorithms.NQueensTest do
 
     res0 = Backtracking.run0(input)
     res1 = Backtracking.run1(input)
+    res2 = Backtracking.run2(input)
 
     # Since solutions can be returned in any order, we need to check if the result contains the expected solutions
     assert length(res0) == 2
     assert length(res1) == 2
+    # assert length(res2) == 2
 
     assert Enum.all?(
              expected,
@@ -26,6 +28,10 @@ defmodule Algorithms.NQueensTest do
              expected,
              fn solution -> solution in res1 end
            )
+    assert Enum.all?(
+             expected,
+             fn solution -> solution in res2 end
+           )
   end
 
   test "board: 1x1" do
@@ -33,7 +39,9 @@ defmodule Algorithms.NQueensTest do
     expected = [["Q"]]
     res0 = Backtracking.run0(input)
     res1 = Backtracking.run1(input)
+    res2 = Backtracking.run2(input)
     assert expected == res0
     assert expected == res1
+    assert expected == res2
   end
 end
