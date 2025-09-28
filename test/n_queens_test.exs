@@ -28,6 +28,7 @@ defmodule Algorithms.NQueensTest do
              expected,
              fn solution -> solution in res1 end
            )
+
     assert Enum.all?(
              expected,
              fn solution -> solution in res2 end
