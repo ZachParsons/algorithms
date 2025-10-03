@@ -1,0 +1,108 @@
+sequenceDiagram
+    participant Test as Test
+    participant run0 as run0/1
+    participant do_run as do_run/4
+    participant safe as safe?/3
+    participant format as format_solution/2
+
+    Note over Test: Test case: 4x4 board
+    Test->>run0: n (Integer, 4)
+    run0->>do_run: n=4, row=0, positions=[], solutions=[]
+    
+    Note over do_run: Row 0: Try columns 0,1,2,3
+    do_run->>safe: positions=[], row=0, col=0
+    safe-->>do_run: result (Boolean, true)
+    do_run->>do_run: n=4, row=1, positions=[{0,0}], solutions=[]
+    
+    Note over do_run: Row 1: Try columns 0,1,2,3
+    do_run->>safe: positions=[{0,0}], row=1, col=0
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{0,0}], row=1, col=1
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{0,0}], row=1, col=2
+    safe-->>do_run: result (Boolean, true)
+    do_run->>do_run: n=4, row=2, positions=[{1,2},{0,0}], solutions=[]
+    
+    Note over do_run: Row 2: Try columns 0,1,2,3
+    do_run->>safe: positions=[{1,2},{0,0}], row=2, col=0
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{1,2},{0,0}], row=2, col=1
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{1,2},{0,0}], row=2, col=2
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{1,2},{0,0}], row=2, col=3
+    safe-->>do_run: result (Boolean, false)
+    do_run-->>do_run: Backtrack to row 1
+    
+    Note over do_run: Row 1: Try column 3
+    do_run->>safe: positions=[{0,0}], row=1, col=3
+    safe-->>do_run: result (Boolean, true)
+    do_run->>do_run: n=4, row=2, positions=[{1,3},{0,0}], solutions=[]
+    
+    Note over do_run: Row 2: Try columns 0,1,2,3
+    do_run->>safe: positions=[{1,3},{0,0}], row=2, col=0
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{1,3},{0,0}], row=2, col=1
+    safe-->>do_run: result (Boolean, true)
+    do_run->>do_run: n=4, row=3, positions=[{2,1},{1,3},{0,0}], solutions=[]
+    
+    Note over do_run: Row 3: Try columns 0,1,2,3
+    do_run->>safe: positions=[{2,1},{1,3},{0,0}], row=3, col=0
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{2,1},{1,3},{0,0}], row=3, col=1
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{2,1},{1,3},{0,0}], row=3, col=2
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{2,1},{1,3},{0,0}], row=3, col=3
+    safe-->>do_run: result (Boolean, false)
+    do_run-->>do_run: Backtrack to row 2
+    
+    Note over do_run: Row 2: Try column 2
+    do_run->>safe: positions=[{1,3},{0,0}], row=2, col=2
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{1,3},{0,0}], row=2, col=3
+    safe-->>do_run: result (Boolean, false)
+    do_run-->>do_run: Backtrack to row 1
+    
+    Note over do_run: Row 1: All columns tried, backtrack to row 0
+    
+    Note over do_run: Row 0: Try column 1
+    do_run->>safe: positions=[], row=0, col=1
+    safe-->>do_run: result (Boolean, true)
+    do_run->>do_run: n=4, row=1, positions=[{0,1}], solutions=[]
+    
+    Note over do_run: Row 1: Try columns 0,1,2,3
+    do_run->>safe: positions=[{0,1}], row=1, col=0
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{0,1}], row=1, col=1
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{0,1}], row=1, col=2
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{0,1}], row=1, col=3
+    safe-->>do_run: result (Boolean, true)
+    do_run->>do_run: n=4, row=2, positions=[{1,3},{0,1}], solutions=[]
+    
+    Note over do_run: Row 2: Try columns 0,1,2,3
+    do_run->>safe: positions=[{1,3},{0,1}], row=2, col=0
+    safe-->>do_run: result (Boolean, true)
+    do_run->>do_run: n=4, row=3, positions=[{2,0},{1,3},{0,1}], solutions=[]
+    
+    Note over do_run: Row 3: Try columns 0,1,2,3
+    do_run->>safe: positions=[{2,0},{1,3},{0,1}], row=3, col=0
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{2,0},{1,3},{0,1}], row=3, col=1
+    safe-->>do_run: result (Boolean, false)
+    do_run->>safe: positions=[{2,0},{1,3},{0,1}], row=3, col=2
+    safe-->>do_run: result (Boolean, true)
+    do_run->>do_run: n=4, row=4, positions=[{3,2},{2,0},{1,3},{0,1}], solutions=[]
+    
+    Note over do_run: Base case reached: row == n (4)
+    do_run->>format: positions=[{3,2},{2,0},{1,3},{0,1}], n=4
+    format-->>do_run: result (List, [".Q..", "...Q", "Q...", "..Q."])
+    do_run-->>do_run: solutions=[".Q..", "...Q", "Q...", "..Q."]
+    
+    Note over do_run: Continue exploring other branches...
+    Note over do_run: (Additional backtracking paths would continue here)
+    
+    do_run-->>run0: result (List, [".Q..", "...Q", "Q...", "..Q.", "..Q.", "Q...", "...Q", ".Q.."])
+    run0-->>Test: result (List, 2 solutions)
