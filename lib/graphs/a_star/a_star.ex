@@ -6,75 +6,7 @@ defmodule Algorithms.Graphs.AStar do
   to guide the search towards the goal, making it more efficient for pathfinding.
   """
   alias Algorithms.PriorityQueue
-
-  defmodule Graph do
-    @moduledoc """
-    Graph representation with support for grid generation and barriers.
-    """
-
-    defstruct links: %{}
-
-    @type position :: {integer(), integer()}
-    @type t :: %__MODULE__{links: %{position() => %{position() => integer()}}}
-
-    def new, do: %__MODULE__{}
-
-    def grid(width, height) do
-      links =
-        for x <- 0..width, y <- 0..height, into: %{} do
-          neighbors =
-            for dx <- -1..1,
-                dy <- -1..1,
-                dx != 0 or dy != 0,
-                nx = x + dx,
-                ny = y + dy,
-                nx >= 0 and nx <= width and ny >= 0 and ny <= height,
-                into: %{} do
-              # Cost calculation: diagonal moves cost more than orthogonal
-              # All moves cost 1 as per problem
-              cost = if abs(dx) + abs(dy) == 2, do: 1, else: 1
-              {{nx, ny}, cost}
-            end
-
-          {{x, y}, neighbors}
-        end
-
-      %__MODULE__{links: links}
-    end
-
-    def with_barriers(%__MODULE__{links: links}, barriers, barrier_cost \\ 100) do
-      updated_links =
-        for {pos, neighbors} <- links, into: %{} do
-          if pos in barriers do
-            # Barrier positions can still be traversed but with high cost
-            updated_neighbors =
-              for {neighbor_pos, _cost} <- neighbors, into: %{} do
-                {neighbor_pos, barrier_cost}
-              end
-
-            {pos, updated_neighbors}
-          else
-            # Update costs to barrier neighbors
-            updated_neighbors =
-              for {neighbor_pos, cost} <- neighbors, into: %{} do
-                if neighbor_pos in barriers do
-                  {neighbor_pos, barrier_cost}
-                else
-                  {neighbor_pos, cost}
-                end
-              end
-
-            {pos, updated_neighbors}
-          end
-        end
-
-      %__MODULE__{links: updated_links}
-    end
-
-    def neighbors(%__MODULE__{links: links}, position) do
-      Map.get(links, position, %{})
-    end
-  end
+  alias Algorithms.Graphs.Graph.Grid
 
   @doc """
   Find the shortest path using A* algorithm.
@@ -116,7 +48,7 @@ defmodule Algorithms.Graphs.AStar do
   end
 
   defp process_neighbors(graph, heuristic_fn, _goal, current, state) do
-    neighbors = Graph.neighbors(graph, current)
+    neighbors = Grid.neighbors(graph, current)
     current_g_score = Map.get(state.g_score, current, :infinity)
 
     Enum.reduce(neighbors, state, fn {neighbor, edge_cost}, acc_state ->
@@ -168,7 +100,7 @@ defmodule Algorithms.Graphs.AStar do
   """
   def solve_chess_board_problem do
     # Create 8x8 grid (0-7 in each dimension)
-    graph = Graph.grid(7, 7)
+    graph = Grid.grid(7, 7)
 
     # Define barriers as specified in the problem
     barriers = [
@@ -187,7 +119,7 @@ defmodule Algorithms.Graphs.AStar do
     ]
 
     # Add barriers with cost 100
-    graph_with_barriers = Graph.with_barriers(graph, barriers, 100)
+    graph_with_barriers = Grid.with_barriers(graph, barriers, 100)
 
     start = {0, 0}
     goal = {7, 7}
@@ -208,7 +140,7 @@ defmodule Algorithms.Graphs.AStar do
   def calculate_path_cost(_graph, [_single_node]), do: 0
 
   def calculate_path_cost(graph, [current | [next | _] = rest]) do
-    neighbors = Graph.neighbors(graph, current)
+    neighbors = Grid.neighbors(graph, current)
     edge_cost = Map.get(neighbors, next, 0)
     edge_cost + calculate_path_cost(graph, rest)
   end

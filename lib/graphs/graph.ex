@@ -12,6 +12,75 @@ defmodule Algorithms.Graphs.Graph do
   # General graph structure using adjacency lists
   defstruct nodes: %{}, links: %{}
 
+  # A* specific graph structure for grid-based pathfinding
+  defmodule Grid do
+    @moduledoc """
+    Graph representation with support for grid generation and barriers.
+    This is the original Graph module from AStar, moved here for consolidation.
+    """
+    defstruct links: %{}
+    @type position :: {integer(), integer()}
+    @type t :: %__MODULE__{links: %{position() => %{position() => integer()}}}
+
+    def new, do: %__MODULE__{}
+
+    def grid(width, height) do
+      links =
+        for x <- 0..width, y <- 0..height, into: %{} do
+          neighbors =
+            for dx <- -1..1,
+                dy <- -1..1,
+                dx != 0 or dy != 0,
+                nx = x + dx,
+                ny = y + dy,
+                nx >= 0 and nx <= width and ny >= 0 and ny <= height,
+                into: %{} do
+              # Cost calculation: diagonal moves cost more than orthogonal
+              # All moves cost 1 as per problem
+              cost = if abs(dx) + abs(dy) == 2, do: 1, else: 1
+              {{nx, ny}, cost}
+            end
+
+          {{x, y}, neighbors}
+        end
+
+      %__MODULE__{links: links}
+    end
+
+    def with_barriers(%__MODULE__{links: links}, barriers, barrier_cost \\ 100) do
+      updated_links =
+        for {pos, neighbors} <- links, into: %{} do
+          if pos in barriers do
+            # Barrier positions can still be traversed but with high cost
+            updated_neighbors =
+              for {neighbor_pos, _cost} <- neighbors, into: %{} do
+                {neighbor_pos, barrier_cost}
+              end
+
+            {pos, updated_neighbors}
+          else
+            # Update costs to barrier neighbors
+            updated_neighbors =
+              for {neighbor_pos, cost} <- neighbors, into: %{} do
+                if neighbor_pos in barriers do
+                  {neighbor_pos, barrier_cost}
+                else
+                  {neighbor_pos, cost}
+                end
+              end
+
+            {pos, updated_neighbors}
+          end
+        end
+
+      %__MODULE__{links: updated_links}
+    end
+
+    def neighbors(%__MODULE__{links: links}, position) do
+      Map.get(links, position, %{})
+    end
+  end
+
   @type graph_node :: any()
   @type position :: {integer(), integer()}
   @type weight :: number()
