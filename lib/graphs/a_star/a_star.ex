@@ -19,6 +19,21 @@ defmodule Algorithms.Graphs.AStar do
 
   ## Returns
   - List of positions representing the optimal path, or empty list if no path found
+
+
+  # Mnemonic:
+    Data Flow: graph + heuristic → priority queue + scores → optimal path
+    main: initial state (g_scores, came_from, open_set) → search_loop
+    
+    loop: dequeue lowest f_score node →
+    if: goal reached → reconstruct path
+    else: process neighbors →
+      for each: tentative_g = current_g + edge_cost
+        if: tentative < existing → update scores + enqueue
+
+    reconstruct: goal ← came_from chain → reversed path list
+
+    Decision Logic: f_score prioritization (g + h), better path detection
   """
   def find_path(graph, heuristic_fn, start, goal) do
     initial_state = %{
