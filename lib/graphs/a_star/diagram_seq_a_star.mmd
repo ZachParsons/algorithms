@@ -1,0 +1,102 @@
+sequenceDiagram
+    participant Test as Test
+    participant Graph as Graph
+    participant AStar as AStar
+    participant PriorityQueue as PriorityQueue
+    participant Heuristic as Heuristic
+    participant SearchLoop as search_loop
+    participant ProcessNeighbors as process_neighbors
+    participant ReconstructPath as reconstruct_path
+    participant BuildPath as build_path
+
+    Note over Test: Test: "finds path in simple 3x3 grid without barriers"
+    Note over Test: graph = Graph.grid(2, 2)<br/>heuristic = fn pos -> Graph.chebyshev_distance(pos, {2, 2}) end<br/>path = Graph.find_path(graph, heuristic, {0, 0}, {2, 2})
+
+    Test->>Graph: grid(width (Integer, 2), height (Integer, 2))
+    Graph-->>Test: graph (Graph, %Graph{links: %{...}})
+
+    Test->>Graph: chebyshev_distance({x1 (Integer, 0), y1 (Integer, 0)}, {x2 (Integer, 2), y2 (Integer, 2)})
+    Graph-->>Test: distance (Integer, 2)
+
+    Test->>AStar: find_path(graph (Graph, %Graph{...}), heuristic_fn (Function, fn pos -> chebyshev_distance(pos, {2, 2}) end), start (Tuple, {0, 0}), goal (Tuple, {2, 2}))
+
+    Note over AStar: Create initial state
+    AStar->>PriorityQueue: new()
+    PriorityQueue-->>AStar: empty_queue (PriorityQueue, %PriorityQueue{items: []})
+
+    AStar->>Heuristic: heuristic_fn.(start (Tuple, {0, 0}))
+    Heuristic->>Graph: chebyshev_distance({x1 (Integer, 0), y1 (Integer, 0)}, {x2 (Integer, 2), y2 (Integer, 2)})
+    Graph-->>Heuristic: distance (Integer, 2)
+    Heuristic-->>AStar: h_score (Integer, 2)
+
+    AStar->>PriorityQueue: enqueue(empty_queue (PriorityQueue, %PriorityQueue{items: []}), start (Tuple, {0, 0}), h_score (Integer, 2))
+    PriorityQueue-->>AStar: open_set (PriorityQueue, %PriorityQueue{items: [{2, {0, 0}}]})
+
+    Note over AStar: initial_state = %{<br/>  came_from: %{},<br/>  g_score: %{{0, 0} => 0},<br/>  open_set: PriorityQueue with {0, 0} at priority 2<br/>}
+
+    AStar->>SearchLoop: search_loop(graph (Graph, %Graph{...}), heuristic_fn (Function, fn pos -> chebyshev_distance(pos, {2, 2}) end), goal (Tuple, {2, 2}), state (Map, %{came_from: %{}, g_score: %{{0, 0} => 0}, open_set: %PriorityQueue{items: [{2, {0, 0}}]}}))
+
+    loop A* Search Loop
+        SearchLoop->>PriorityQueue: dequeue(state.open_set (PriorityQueue, %PriorityQueue{items: [{2, {0, 0}}]}))
+        PriorityQueue-->>SearchLoop: {current (Tuple, {0, 0}), new_open_set (PriorityQueue, %PriorityQueue{items: []})}
+
+        Note over SearchLoop: current = {0, 0}, goal = {2, 2}<br/>current != goal, continue processing
+
+        SearchLoop->>ProcessNeighbors: process_neighbors(graph (Graph, %Graph{...}), heuristic_fn (Function, fn pos -> chebyshev_distance(pos, {2, 2}) end), goal (Tuple, {2, 2}), current (Tuple, {0, 0}), state (Map, %{came_from: %{}, g_score: %{{0, 0} => 0}, open_set: %PriorityQueue{items: []}}))
+
+        ProcessNeighbors->>Graph: neighbors(graph (Graph, %Graph{...}), position (Tuple, {0, 0}))
+        Graph-->>ProcessNeighbors: neighbors (Map, %{{0, 1} => 1, {1, 0} => 1, {1, 1} => 1})
+
+        Note over ProcessNeighbors: current_g_score = 0<br/>Process each neighbor: {0, 1}, {1, 0}, {1, 1}
+
+        loop For each neighbor
+            Note over ProcessNeighbors: neighbor = {0, 1}, edge_cost = 1<br/>tentative_g_score = 0 + 1 = 1<br/>neighbor_g_score = :infinity<br/>1 < :infinity, so update
+
+            ProcessNeighbors->>Heuristic: heuristic_fn.(neighbor (Tuple, {0, 1}))
+            Heuristic->>Graph: chebyshev_distance({x1 (Integer, 0), y1 (Integer, 1)}, {x2 (Integer, 2), y2 (Integer, 2)})
+            Graph-->>Heuristic: distance (Integer, 2)
+            Heuristic-->>ProcessNeighbors: h_score (Integer, 2)
+
+            Note over ProcessNeighbors: f_score = 1 + 2 = 3
+
+            ProcessNeighbors->>PriorityQueue: enqueue(acc_state.open_set (PriorityQueue, %PriorityQueue{items: []}), neighbor (Tuple, {0, 1}), f_score (Integer, 3))
+            PriorityQueue-->>ProcessNeighbors: updated_open_set (PriorityQueue, %PriorityQueue{items: [{3, {0, 1}}]})
+
+            Note over ProcessNeighbors: Update state:<br/>came_from: %{{0, 1} => {0, 0}}<br/>g_score: %{{0, 0} => 0, {0, 1} => 1}<br/>open_set: PriorityQueue with {0, 1} at priority 3
+        end
+
+        Note over ProcessNeighbors: Process neighbor {1, 0}:<br/>tentative_g_score = 1, f_score = 3<br/>Update state with {1, 0} at priority 3
+
+        Note over ProcessNeighbors: Process neighbor {1, 1}:<br/>tentative_g_score = 1, f_score = 3<br/>Update state with {1, 1} at priority 3
+
+        ProcessNeighbors-->>SearchLoop: updated_state (Map, %{came_from: %{{0, 1} => {0, 0}, {1, 0} => {0, 0}, {1, 1} => {0, 0}}, g_score: %{{0, 0} => 0, {0, 1} => 1, {1, 0} => 1, {1, 1} => 1}, open_set: %PriorityQueue{items: [{3, {0, 1}}, {3, {1, 0}}, {3, {1, 1}}]}})
+
+        SearchLoop->>SearchLoop: search_loop(graph, heuristic_fn, goal, updated_state)
+
+        Note over SearchLoop: Next iteration: dequeue {0, 1} (or {1, 0} or {1, 1})<br/>current = {0, 1}, goal = {2, 2}<br/>current != goal, continue
+
+        SearchLoop->>ProcessNeighbors: process_neighbors(graph, heuristic_fn, goal, current, state)
+
+        Note over ProcessNeighbors: Process neighbors of {0, 1}:<br/>neighbors = %{{0, 0} => 1, {0, 2} => 1, {1, 0} => 1, {1, 1} => 1, {1, 2} => 1}<br/>Some neighbors already processed, some new
+
+        loop Continue processing until goal reached
+            Note over SearchLoop: Eventually current = {2, 2} = goal<br/>Exit search loop
+        end
+
+        SearchLoop->>ReconstructPath: reconstruct_path(state.came_from (Map, %{...}), goal (Tuple, {2, 2}))
+        ReconstructPath->>BuildPath: build_path(came_from (Map, %{...}), current (Tuple, {2, 2}), path (List, [{2, 2}]))
+
+        loop Path reconstruction
+            BuildPath->>BuildPath: Map.get(came_from, current)
+            Note over BuildPath: Get parent of {2, 2}, add to path<br/>Continue until parent is nil
+            BuildPath-->>BuildPath: path (List, [{0, 0}, {0, 1}, {0, 2}, {1, 2}, {2, 2}])
+        end
+
+        BuildPath-->>ReconstructPath: path (List, [{0, 0}, {0, 1}, {0, 2}, {1, 2}, {2, 2}])
+        ReconstructPath-->>SearchLoop: path (List, [{0, 0}, {0, 1}, {0, 2}, {1, 2}, {2, 2}])
+    end
+
+    SearchLoop-->>AStar: path (List, [{0, 0}, {0, 1}, {0, 2}, {1, 2}, {2, 2}])
+    AStar-->>Test: path (List, [{0, 0}, {0, 1}, {0, 2}, {1, 2}, {2, 2}])
+
+    Note over Test: Test assertions:<br/>assert length(path) > 0 ✓<br/>assert List.first(path) == {0, 0} ✓<br/>assert List.last(path) == {2, 2} ✓
