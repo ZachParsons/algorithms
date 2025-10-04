@@ -1,7 +1,7 @@
-defmodule Algorithms.BinarySearchTreeTest do
+defmodule Algorithms.Trees.BinarySearchTest do
   use ExUnit.Case
-  alias Algorithms.BinarySearchTree
-  alias Algorithms.BinarySearchTree.Node
+  alias Algorithms.Trees.BinarySearch
+  alias Algorithms.Trees.BinarySearch.Node
 
   describe "depth_first_preorder/1" do
     test "traverses depth-2 (three level) tree" do
@@ -19,7 +19,7 @@ defmodule Algorithms.BinarySearchTreeTest do
         }
       }
 
-      assert [8, 4, 2, 6, 12, 10, 14] == BinarySearchTree.depth_first_preorder(tree)
+      assert [8, 4, 2, 6, 12, 10, 14] == BinarySearch.depth_first_preorder(tree)
     end
   end
 
@@ -39,7 +39,7 @@ defmodule Algorithms.BinarySearchTreeTest do
         }
       }
 
-      assert [2, 4, 6, 8, 10, 12, 14] == BinarySearchTree.depth_first_inorder(tree)
+      assert [2, 4, 6, 8, 10, 12, 14] == BinarySearch.depth_first_inorder(tree)
     end
   end
 
@@ -59,7 +59,7 @@ defmodule Algorithms.BinarySearchTreeTest do
         }
       }
 
-      assert [2, 6, 4, 10, 14, 12, 8] == BinarySearchTree.depth_first_postorder(tree)
+      assert [2, 6, 4, 10, 14, 12, 8] == BinarySearch.depth_first_postorder(tree)
     end
   end
 
@@ -79,7 +79,7 @@ defmodule Algorithms.BinarySearchTreeTest do
         }
       }
 
-      assert [8, 4, 12, 2, 6, 10, 14] == BinarySearchTree.breadth_first_level_order(tree)
+      assert [8, 4, 12, 2, 6, 10, 14] == BinarySearch.breadth_first_level_order(tree)
     end
   end
 
@@ -111,17 +111,17 @@ defmodule Algorithms.BinarySearchTreeTest do
                  value: 7
                },
                right: nil
-             } == BinarySearchTree.find(9, tree)
+             } == BinarySearch.find(9, tree)
     end
 
     test "Not found", %{tree: tree} do
-      assert :not_found == BinarySearchTree.find(2, tree)
+      assert :not_found == BinarySearch.find(2, tree)
     end
   end
 
   describe "insert/2" do
     test "inserts into empty tree" do
-      assert %Node{value: 5, left: nil, right: nil} == BinarySearchTree.insert(5, nil)
+      assert %Node{value: 5, left: nil, right: nil} == BinarySearch.insert(5, nil)
     end
 
     test "inserts maintaining BST properties" do
@@ -134,22 +134,22 @@ defmodule Algorithms.BinarySearchTreeTest do
 
       # Insert values that should go to different positions
       # Should go left of 4
-      tree = BinarySearchTree.insert(2, tree)
+      tree = BinarySearch.insert(2, tree)
       # Should go right of 4
-      tree = BinarySearchTree.insert(6, tree)
+      tree = BinarySearch.insert(6, tree)
       # Should go left of 12
-      tree = BinarySearchTree.insert(10, tree)
+      tree = BinarySearch.insert(10, tree)
       # Should go right of 12
-      tree = BinarySearchTree.insert(14, tree)
+      tree = BinarySearch.insert(14, tree)
 
       # Verify the structure through inorder traversal (should be sorted)
-      assert [2, 4, 6, 8, 10, 12, 14] == BinarySearchTree.depth_first_inorder(tree)
+      assert [2, 4, 6, 8, 10, 12, 14] == BinarySearch.depth_first_inorder(tree)
     end
 
     test "inserts equal values to the left" do
       tree = %Node{value: 5, left: nil, right: nil}
       # Equal value should go left
-      tree = BinarySearchTree.insert(5, tree)
+      tree = BinarySearch.insert(5, tree)
 
       assert %Node{
                value: 5,
@@ -185,12 +185,12 @@ defmodule Algorithms.BinarySearchTreeTest do
         right: %Node{value: 17, left: nil, right: nil}
       }
 
-      {:ok, updated_tree} = BinarySearchTree.update(8, new_subtree, tree)
+      {:ok, updated_tree} = BinarySearch.update(8, new_subtree, tree)
 
       # Root is replaced with new subtree, orphaned values (2,4,6,10,12,14) are re-inserted
       # So inorder: [2, 4, 6, 10, 12, 13, 14, 15, 17]
       assert [2, 4, 6, 10, 12, 13, 14, 15, 17] ==
-               BinarySearchTree.depth_first_inorder(updated_tree)
+               BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "updates leaf node with new subtree", %{tree: tree} do
@@ -200,11 +200,11 @@ defmodule Algorithms.BinarySearchTreeTest do
         right: %Node{value: 5, left: nil, right: nil}
       }
 
-      {:ok, updated_tree} = BinarySearchTree.update(2, new_subtree, tree)
+      {:ok, updated_tree} = BinarySearch.update(2, new_subtree, tree)
 
       # Leaf node 2 is replaced with new subtree (3), orphaned value 2 is not re-inserted
       # So inorder: [1, 3, 4, 5, 6, 8, 10, 12, 14]
-      assert [1, 3, 4, 5, 6, 8, 10, 12, 14] == BinarySearchTree.depth_first_inorder(updated_tree)
+      assert [1, 3, 4, 5, 6, 8, 10, 12, 14] == BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "updates internal node with new subtree", %{tree: tree} do
@@ -214,11 +214,11 @@ defmodule Algorithms.BinarySearchTreeTest do
         right: %Node{value: 7, left: nil, right: nil}
       }
 
-      {:ok, updated_tree} = BinarySearchTree.update(4, new_subtree, tree)
+      {:ok, updated_tree} = BinarySearch.update(4, new_subtree, tree)
 
       # Internal node 4 is replaced with new subtree (5), orphaned values (2,6) are re-inserted
       # So inorder: [2, 3, 5, 6, 7, 8, 10, 12, 14]
-      assert [2, 3, 5, 6, 7, 8, 10, 12, 14] == BinarySearchTree.depth_first_inorder(updated_tree)
+      assert [2, 3, 5, 6, 7, 8, 10, 12, 14] == BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "updates node in right subtree", %{tree: tree} do
@@ -228,35 +228,35 @@ defmodule Algorithms.BinarySearchTreeTest do
         right: %Node{value: 13, left: nil, right: nil}
       }
 
-      {:ok, updated_tree} = BinarySearchTree.update(10, new_subtree, tree)
+      {:ok, updated_tree} = BinarySearch.update(10, new_subtree, tree)
 
       # Node 10 is replaced with new subtree (11), orphaned value 10 is not re-inserted
       # So inorder: [2, 4, 6, 8, 9, 11, 12, 13, 14]
-      assert [2, 4, 6, 8, 9, 11, 12, 13, 14] == BinarySearchTree.depth_first_inorder(updated_tree)
+      assert [2, 4, 6, 8, 9, 11, 12, 13, 14] == BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "updates with nil subtree (removes node)", %{tree: tree} do
-      {:ok, updated_tree} = BinarySearchTree.update(4, nil, tree)
+      {:ok, updated_tree} = BinarySearch.update(4, nil, tree)
 
       # Node 4 is removed, orphaned values (2,6) are re-inserted
       # So inorder: [2, 6, 8, 10, 12, 14]
-      assert [2, 6, 8, 10, 12, 14] == BinarySearchTree.depth_first_inorder(updated_tree)
+      assert [2, 6, 8, 10, 12, 14] == BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "updates with single node subtree", %{tree: tree} do
       new_subtree = %Node{value: 20, left: nil, right: nil}
 
-      {:ok, updated_tree} = BinarySearchTree.update(6, new_subtree, tree)
+      {:ok, updated_tree} = BinarySearch.update(6, new_subtree, tree)
 
       # Node 6 is replaced with new subtree (20), orphaned value 6 is not re-inserted
       # So inorder: [2, 4, 8, 10, 12, 14, 20]
-      assert [2, 4, 8, 10, 12, 14, 20] == BinarySearchTree.depth_first_inorder(updated_tree)
+      assert [2, 4, 8, 10, 12, 14, 20] == BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "returns error when target not found", %{tree: tree} do
       new_subtree = %Node{value: 99, left: nil, right: nil}
 
-      assert {:error, :not_found} = BinarySearchTree.update(99, new_subtree, tree)
+      assert {:error, :not_found} = BinarySearch.update(99, new_subtree, tree)
     end
 
     test "maintains BST properties after update", %{tree: tree} do
@@ -275,18 +275,18 @@ defmodule Algorithms.BinarySearchTreeTest do
         }
       }
 
-      {:ok, updated_tree} = BinarySearchTree.update(4, new_subtree, tree)
+      {:ok, updated_tree} = BinarySearch.update(4, new_subtree, tree)
 
       # Node 4 is replaced with new subtree, orphaned values (2,6) are re-inserted
       # So inorder: [1, 2, 3, 4, 5, 6, 6, 7, 8, 8, 10, 12, 14]
-      inorder_result = BinarySearchTree.depth_first_inorder(updated_tree)
+      inorder_result = BinarySearch.depth_first_inorder(updated_tree)
       assert inorder_result == Enum.sort(inorder_result)
       assert [1, 2, 3, 4, 5, 6, 6, 7, 8, 8, 10, 12, 14] == inorder_result
     end
 
     test "updates empty tree returns error" do
       new_subtree = %Node{value: 5, left: nil, right: nil}
-      assert {:error, :not_found} = BinarySearchTree.update(5, new_subtree, nil)
+      assert {:error, :not_found} = BinarySearch.update(5, new_subtree, nil)
     end
   end
 
@@ -310,10 +310,10 @@ defmodule Algorithms.BinarySearchTreeTest do
     end
 
     test "deletes leaf node", %{tree: tree} do
-      {:ok, updated_tree} = BinarySearchTree.delete(2, tree)
+      {:ok, updated_tree} = BinarySearch.delete(2, tree)
 
       # Node 2 (leaf) is removed
-      assert [4, 6, 8, 10, 12, 14] == BinarySearchTree.depth_first_inorder(updated_tree)
+      assert [4, 6, 8, 10, 12, 14] == BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "deletes node with only left child", %{tree: tree} do
@@ -326,10 +326,10 @@ defmodule Algorithms.BinarySearchTreeTest do
           }
       }
 
-      {:ok, updated_tree} = BinarySearchTree.delete(10, tree_with_left_only)
+      {:ok, updated_tree} = BinarySearch.delete(10, tree_with_left_only)
 
       # Node 10 is removed, its left child (9) takes its place
-      assert [2, 4, 6, 8, 9, 12, 14] == BinarySearchTree.depth_first_inorder(updated_tree)
+      assert [2, 4, 6, 8, 9, 12, 14] == BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "deletes node with only right child", %{tree: tree} do
@@ -342,32 +342,32 @@ defmodule Algorithms.BinarySearchTreeTest do
           }
       }
 
-      {:ok, updated_tree} = BinarySearchTree.delete(10, tree_with_right_only)
+      {:ok, updated_tree} = BinarySearch.delete(10, tree_with_right_only)
 
       # Node 10 is removed, its right child (11) takes its place
-      assert [2, 4, 6, 8, 11, 12, 14] == BinarySearchTree.depth_first_inorder(updated_tree)
+      assert [2, 4, 6, 8, 11, 12, 14] == BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "deletes node with both children", %{tree: tree} do
-      {:ok, updated_tree} = BinarySearchTree.delete(4, tree)
+      {:ok, updated_tree} = BinarySearch.delete(4, tree)
 
       # Node 4 is removed, replaced with smallest value from right subtree (6)
       # The right subtree of 4 (6) becomes the right subtree of the new root
-      assert [2, 6, 8, 10, 12, 14] == BinarySearchTree.depth_first_inorder(updated_tree)
+      assert [2, 6, 8, 10, 12, 14] == BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "deletes root node", %{tree: tree} do
-      {:ok, updated_tree} = BinarySearchTree.delete(8, tree)
+      {:ok, updated_tree} = BinarySearch.delete(8, tree)
 
       # Root node 8 is removed, replaced with smallest value from right subtree (10)
-      assert [2, 4, 6, 10, 12, 14] == BinarySearchTree.depth_first_inorder(updated_tree)
+      assert [2, 4, 6, 10, 12, 14] == BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "deletes node in right subtree", %{tree: tree} do
-      {:ok, updated_tree} = BinarySearchTree.delete(12, tree)
+      {:ok, updated_tree} = BinarySearch.delete(12, tree)
 
       # Node 12 is removed, replaced with smallest value from right subtree (14)
-      assert [2, 4, 6, 8, 10, 14] == BinarySearchTree.depth_first_inorder(updated_tree)
+      assert [2, 4, 6, 8, 10, 14] == BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "deletes node with complex right subtree", %{tree: tree} do
@@ -384,65 +384,65 @@ defmodule Algorithms.BinarySearchTreeTest do
           }
       }
 
-      {:ok, updated_tree} = BinarySearchTree.delete(12, complex_tree)
+      {:ok, updated_tree} = BinarySearch.delete(12, complex_tree)
 
       # Node 12 is removed, replaced with smallest value from right subtree (13)
       assert [2, 4, 6, 8, 10, 13, 14, 15, 16] ==
-               BinarySearchTree.depth_first_inorder(updated_tree)
+               BinarySearch.depth_first_inorder(updated_tree)
     end
 
     test "deletes from empty tree returns error" do
-      assert {:error, :not_found} = BinarySearchTree.delete(5, nil)
+      assert {:error, :not_found} = BinarySearch.delete(5, nil)
     end
 
     test "deletes non-existent value returns error", %{tree: tree} do
-      assert {:error, :not_found} = BinarySearchTree.delete(99, tree)
+      assert {:error, :not_found} = BinarySearch.delete(99, tree)
     end
 
     test "deletes single node tree", %{tree: _tree} do
       single_node_tree = %Node{value: 5, left: nil, right: nil}
-      {:ok, updated_tree} = BinarySearchTree.delete(5, single_node_tree)
+      {:ok, updated_tree} = BinarySearch.delete(5, single_node_tree)
 
       assert nil == updated_tree
     end
 
     test "maintains BST properties after deletion", %{tree: tree} do
-      {:ok, updated_tree} = BinarySearchTree.delete(4, tree)
+      {:ok, updated_tree} = BinarySearch.delete(4, tree)
 
       # Verify the tree maintains BST properties by checking inorder traversal is sorted
-      inorder_result = BinarySearchTree.depth_first_inorder(updated_tree)
+      inorder_result = BinarySearch.depth_first_inorder(updated_tree)
       assert inorder_result == Enum.sort(inorder_result)
     end
 
     test "deletes multiple nodes sequentially", %{tree: tree} do
       # Delete leaf node first
-      {:ok, tree1} = BinarySearchTree.delete(2, tree)
-      assert [4, 6, 8, 10, 12, 14] == BinarySearchTree.depth_first_inorder(tree1)
+      {:ok, tree1} = BinarySearch.delete(2, tree)
+      assert [4, 6, 8, 10, 12, 14] == BinarySearch.depth_first_inorder(tree1)
 
       # Delete internal node
-      {:ok, tree2} = BinarySearchTree.delete(4, tree1)
-      assert [6, 8, 10, 12, 14] == BinarySearchTree.depth_first_inorder(tree2)
+      {:ok, tree2} = BinarySearch.delete(4, tree1)
+      assert [6, 8, 10, 12, 14] == BinarySearch.depth_first_inorder(tree2)
 
       # Delete root node
-      {:ok, tree3} = BinarySearchTree.delete(8, tree2)
-      assert [6, 10, 12, 14] == BinarySearchTree.depth_first_inorder(tree3)
+      {:ok, tree3} = BinarySearch.delete(8, tree2)
+      assert [6, 10, 12, 14] == BinarySearch.depth_first_inorder(tree3)
 
       # Delete another internal node
-      {:ok, tree4} = BinarySearchTree.delete(12, tree3)
-      assert [6, 10, 14] == BinarySearchTree.depth_first_inorder(tree4)
+      {:ok, tree4} = BinarySearch.delete(12, tree3)
+      assert [6, 10, 14] == BinarySearch.depth_first_inorder(tree4)
     end
 
     test "deletes node with duplicate values", %{tree: tree} do
       # Create a tree with duplicate values
       # Insert another 4
-      tree_with_duplicates = BinarySearchTree.insert(4, tree)
+      tree_with_duplicates = BinarySearch.insert(4, tree)
       # Insert another 6
-      tree_with_duplicates = BinarySearchTree.insert(6, tree_with_duplicates)
+      tree_with_duplicates = BinarySearch.insert(6, tree_with_duplicates)
 
-      {:ok, updated_tree} = BinarySearchTree.delete(4, tree_with_duplicates)
+      {:ok, updated_tree} = BinarySearch.delete(4, tree_with_duplicates)
 
       # One instance of 4 should be removed, but the other should remain
-      inorder_result = BinarySearchTree.depth_first_inorder(updated_tree)
+      inorder_result = BinarySearch.depth_first_inorder(updated_tree)
       # Should still have one 4
       assert 4 in inorder_result
       # Should still have 6

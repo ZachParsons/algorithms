@@ -1,4 +1,4 @@
-defmodule Algorithms.BinarySearchTree do
+defmodule Algorithms.Trees.BinarySearch do
   @moduledoc """
   A binary tree is a hierarchical data structure where each node has a maximum of two children (left and right). A binary search tree (BST) is a specific type of binary tree where the nodes are arranged in a way that allows for efficient searching. In a BST, the left child of a node always has a value less than or equal to the node's value, and the right child always has a value greater than or equal to the node's value.
   """
