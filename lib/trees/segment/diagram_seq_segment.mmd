@@ -1,0 +1,107 @@
+sequenceDiagram
+    participant Test as Test
+    participant Segment as Segment
+    participant BuildTree as build_tree
+    participant UpdateTree as update_tree
+    participant QueryTree as query_tree
+
+    %% Test: Initialize with [1, 3, 5]
+    Test->>Segment: init(ints: [integer], [1, 3, 5])
+    Segment->>Segment: length(ints: [integer]) 
+    Segment-->>Segment: n (integer, 3)
+    
+    %% Build tree recursively
+    Segment->>BuildTree: build_tree(ints: [integer] [1,3,5], node: integer 1, start: integer 0, finish: integer 2, tree: map {})
+    
+    %% Build left subtree (node 2, range 0-1)
+    BuildTree->>BuildTree: build_tree(ints: [integer] [1,3,5], node: integer 2, start: integer 0, finish: integer 1, tree: map {})
+    
+    %% Build left-left leaf (node 4, range 0-0)
+    BuildTree->>BuildTree: build_tree(ints: [integer] [1,3,5], node: integer 4, start: integer 0, finish: integer 0, tree: map {})
+    BuildTree->>BuildTree: Enum.at(ints: [integer] [1,3,5], start: integer 0)
+    BuildTree-->>BuildTree: value (integer, 1)
+    BuildTree-->>BuildTree: tree (map, {4 => 1})
+    
+    %% Build left-right leaf (node 5, range 1-1)
+    BuildTree->>BuildTree: build_tree(ints: [integer] [1,3,5], node: integer 5, start: integer 1, finish: integer 1, tree: map {4 => 1})
+    BuildTree->>BuildTree: Enum.at(ints: [integer] [1,3,5], start: integer 1)
+    BuildTree-->>BuildTree: value (integer, 3)
+    BuildTree-->>BuildTree: tree (map, {4 => 1, 5 => 3})
+    
+    %% Sum left subtree
+    BuildTree->>BuildTree: Map.get(tree: map {4=>1, 5=>3}, left_child: integer 4, default: integer 0)
+    BuildTree-->>BuildTree: left_val (integer, 1)
+    BuildTree->>BuildTree: Map.get(tree: map {4=>1, 5=>3}, right_child: integer 5, default: integer 0)
+    BuildTree-->>BuildTree: right_val (integer, 3)
+    BuildTree-->>BuildTree: tree (map, {2 => 4, 4 => 1, 5 => 3})
+    
+    %% Build right subtree (node 3, range 2-2)
+    BuildTree->>BuildTree: build_tree(ints: [integer] [1,3,5], node: integer 3, start: integer 2, finish: integer 2, tree: map {2=>4, 4=>1, 5=>3})
+    BuildTree->>BuildTree: Enum.at(ints: [integer] [1,3,5], start: integer 2)
+    BuildTree-->>BuildTree: value (integer, 5)
+    BuildTree-->>BuildTree: tree (map, {2 => 4, 3 => 5, 4 => 1, 5 => 3})
+    
+    %% Sum root
+    BuildTree->>BuildTree: Map.get(tree: map, left_child: integer 2, default: integer 0)
+    BuildTree-->>BuildTree: left_val (integer, 4)
+    BuildTree->>BuildTree: Map.get(tree: map, right_child: integer 3, default: integer 0)
+    BuildTree-->>BuildTree: right_val (integer, 5)
+    BuildTree-->>BuildTree: tree (map, {1 => 9, 2 => 4, 3 => 5, 4 => 1, 5 => 3})
+    
+    BuildTree-->>Segment: tree (map, {1 => 9, 2 => 4, 3 => 5, 4 => 1, 5 => 3})
+    Segment-->>Test: struct (%Segment{tree: map {1=>9, 2=>4, 3=>5, 4=>1, 5=>3}, n: integer 3, original: [integer] [1,3,5]})
+
+    %% Test: sum_range(tree, 0, 2) == 9
+    Test->>Segment: sum_range(tree: %Segment{}, left: integer 0, right: integer 2)
+    Segment->>QueryTree: query_tree(tree: map {1=>9, 2=>4, 3=>5, 4=>1, 5=>3}, node: integer 1, start: integer 0, finish: integer 2, l: integer 0, r: integer 2)
+    QueryTree->>QueryTree: l <= start and finish <= r (0 <= 0 and 2 <= 2)
+    QueryTree->>QueryTree: Map.get(tree: map {1=>9, 2=>4, 3=>5, 4=>1, 5=>3}, node: integer 1, default: integer 0)
+    QueryTree-->>QueryTree: result (integer, 9)
+    QueryTree-->>Segment: result (integer, 9)
+    Segment-->>Test: result (integer, 9)
+
+    %% Test: Update index 1 to value 2
+    Test->>Segment: update(tree: %Segment{}, index: integer 1, val: integer 2)
+    Segment->>Segment: List.replace_at(original: [integer] [1,3,5], index: integer 1, val: integer 2)
+    Segment-->>Segment: new_original ([integer], [1,2,5])
+    
+    Segment->>UpdateTree: update_tree(tree: map {1=>9, 2=>4, 3=>5, 4=>1, 5=>3}, node: integer 1, start: integer 0, finish: integer 2, idx: integer 1, val: integer 2)
+    UpdateTree->>UpdateTree: idx <= mid (1 <= 1)
+    UpdateTree->>UpdateTree: update_tree(tree: map, node: integer 2, start: integer 0, finish: integer 1, idx: integer 1, val: integer 2)
+    UpdateTree->>UpdateTree: idx <= mid (1 <= 0) -> false
+    UpdateTree->>UpdateTree: update_tree(tree: map, node: integer 5, start: integer 1, finish: integer 1, idx: integer 1, val: integer 2)
+    UpdateTree->>UpdateTree: start == finish (1 == 1)
+    UpdateTree-->>UpdateTree: tree (map, {1=>9, 2=>4, 3=>5, 4=>1, 5=>2})
+    
+    %% Bubble up sums
+    UpdateTree->>UpdateTree: Map.get(new_tree: map, left_child: integer 4, default: integer 0)
+    UpdateTree-->>UpdateTree: left_val (integer, 1)
+    UpdateTree->>UpdateTree: Map.get(new_tree: map, right_child: integer 5, default: integer 0)
+    UpdateTree-->>UpdateTree: right_val (integer, 2)
+    UpdateTree-->>UpdateTree: tree (map, {1=>9, 2=>3, 3=>5, 4=>1, 5=>2})
+    
+    UpdateTree->>UpdateTree: Map.get(new_tree: map, left_child: integer 2, default: integer 0)
+    UpdateTree-->>UpdateTree: left_val (integer, 3)
+    UpdateTree->>UpdateTree: Map.get(new_tree: map, right_child: integer 3, default: integer 0)
+    UpdateTree-->>UpdateTree: right_val (integer, 5)
+    UpdateTree-->>UpdateTree: tree (map, {1=>8, 2=>3, 3=>5, 4=>1, 5=>2})
+    
+    UpdateTree-->>Segment: new_tree (map, {1=>8, 2=>3, 3=>5, 4=>1, 5=>2})
+    Segment-->>Test: updated_tree (%Segment{tree: map {1=>8, 2=>3, 3=>5, 4=>1, 5=>2}, n: integer 3, original: [integer] [1,2,5]})
+
+    %% Test: sum_range(updated_tree, 0, 2) == 8
+    Test->>Segment: sum_range(tree: %Segment{}, left: integer 0, right: integer 2)
+    Segment->>QueryTree: query_tree(tree: map {1=>8, 2=>3, 3=>5, 4=>1, 5=>2}, node: integer 1, start: integer 0, finish: integer 2, l: integer 0, r: integer 2)
+    QueryTree->>QueryTree: l <= start and finish <= r (0 <= 0 and 2 <= 2)
+    QueryTree->>QueryTree: Map.get(tree: map {1=>8, 2=>3, 3=>5, 4=>1, 5=>2}, node: integer 1, default: integer 0)
+    QueryTree-->>QueryTree: result (integer, 8)
+    QueryTree-->>Segment: result (integer, 8)
+    Segment-->>Test: result (integer, 8)
+
+    %% Test: Verify original tree unchanged - sum_range(tree, 0, 2) == 9
+    Test->>Segment: sum_range(tree: %Segment{}, left: integer 0, right: integer 2)
+    Segment->>QueryTree: query_tree(tree: map {1=>9, 2=>4, 3=>5, 4=>1, 5=>3}, node: integer 1, start: integer 0, finish: integer 2, l: integer 0, r: integer 2)
+    QueryTree->>QueryTree: Map.get(tree: map {1=>9, 2=>4, 3=>5, 4=>1, 5=>3}, node: integer 1, default: integer 0)
+    QueryTree-->>QueryTree: result (integer, 9)
+    QueryTree-->>Segment: result (integer, 9)
+    Segment-->>Test: result (integer, 9)
