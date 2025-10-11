@@ -6,23 +6,10 @@ defmodule Algorithms.Trees.Segment do
   This follows pure functional programming principles with no side effects.
 
   Mnemonic:
-  Data Flow: [integers] → {node_id => sum} → struct → integer
-
-  Build: Recursive divide: leaf stores value, parent sums children
-
-  Update: Path descent: if target ≤ mid go left, else right, bubble sums up
-
-  Query: Range overlap: none=0, complete=node_value, partial=recurse both
-  sides
-
-  Decision Logic:
-    Base: start == finish → leaf node (store/update value)
-    Branch: idx ≤ mid → descend left subtree, else right
-    Overlap: no_overlap=0, complete_overlap=cached, partial=sum_children
-
-  Iteration Strategy: Log-height tree traversal, immutable map updates
-
-  This captures the essence: segment trees partition ranges into a binary tree where each node caches the sum of its range, enabling O(log n) updates and queries through selective tree traversal based on range overlap patterns.
+  Build: Split array recursively, store values at leaves, bubble sums to parents
+  Store: Map node_id→sum, track original array for updates
+  Query: Check overlap - none=0, complete=cached, partial=recurse left+right
+  Update: Find leaf by index, replace value, bubble new sums up path
   """
 
   defstruct tree: %{}, el_count: 0, source: []
