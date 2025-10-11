@@ -1,14 +1,13 @@
 defmodule Algorithms.Trees.BinarySearch do
   @moduledoc """
   A binary tree is a hierarchical data structure where each node has a maximum of two children (left and right). A binary search tree (BST) is a specific type of binary tree where the nodes are arranged in a way that allows for efficient searching. In a BST, the left child of a node always has a value less than or equal to the node's value, and the right child always has a value greater than or equal to the node's value.
-  """
 
-  # TODO:
-  # [x] 1. list || traverse.
-  # [x] 2. get || find.
-  # [x] 3. insert || create.
-  # [x] 4. update || move subtree.
-  # [x] 5. delete subtree.
+  Mnemonic:
+  Insert: Compare value, go left if smaller, right if larger, create node at nil
+  Traverse: Visit nodes in order - preorder (root→left→right), inorder (left→root→right), postorder (left→right→root)
+  Find: Compare value, go left if smaller, right if larger, return node or :not_found
+  Delete: Find node, replace with nil (leaf), child (one child), or inorder successor (two children)
+  """
 
   defmodule Node do
     @moduledoc false
