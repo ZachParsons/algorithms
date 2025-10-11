@@ -1,0 +1,81 @@
+sequenceDiagram
+    participant Test as Test Case
+    participant Run as run/1
+    participant CreateState as create_initial_state/1
+    participant CalcBound as calculate_lower_bound/1
+    participant FindMins as find_two_minimums/2
+    participant Solve as solve/1
+    participant BranchBound as branch_and_bound/2
+    participant GenStates as generate_next_states/1
+    participant CreateNext as create_next_state/2
+    participant CalcNewBound as calculate_new_bound/3
+    participant FilterStates as filter_promising_states/2
+    participant ExploreStates as explore_states/2
+    participant TryComplete as try_complete_tour/1
+    participant ChooseBetter as choose_better_solution/2
+    participant CompleteTour as complete_tour/1
+
+    Test->>Run: adj_matrix ([[0,10,15,20],[10,0,35,25],[15,35,0,30],[20,25,30,0]])
+    Run->>CreateState: matrix ([[0,10,15,20],[10,0,35,25],[15,35,0,30],[20,25,30,0]])
+    
+    CreateState->>CalcBound: matrix ([[0,10,15,20],[10,0,35,25],[15,35,0,30],[20,25,30,0]])
+    CalcBound->>FindMins: row ([0,10,15,20]), vertex (0)
+    FindMins-->>CalcBound: {first_min, second_min} ({10, 15})
+    CalcBound->>FindMins: row ([10,0,35,25]), vertex (1)
+    FindMins-->>CalcBound: {first_min, second_min} ({10, 25})
+    CalcBound->>FindMins: row ([15,35,0,30]), vertex (2)
+    FindMins-->>CalcBound: {first_min, second_min} ({15, 30})
+    CalcBound->>FindMins: row ([20,25,30,0]), vertex (3)
+    FindMins-->>CalcBound: {first_min, second_min} ({20, 25})
+    CalcBound-->>CreateState: initial_bound (75)
+    
+    CreateState-->>Run: state (%TSP.BB{matrix: [[...]], n: 4, visited: MapSet([0]), path: [0], cost: 0, bound: 75, level: 1})
+    
+    Run->>Solve: state (%TSP.BB{...})
+    Solve->>BranchBound: state (%TSP.BB{...}), best_solution ({:infinity, []})
+    
+    BranchBound->>GenStates: state (%TSP.BB{path: [0], visited: MapSet([0])})
+    GenStates->>CreateNext: state (%TSP.BB{...}), next_city (1)
+    CreateNext->>CalcNewBound: state (%TSP.BB{level: 1}), from_city (0), to_city (1)
+    CalcNewBound-->>CreateNext: new_bound (62)
+    CreateNext-->>GenStates: new_state (%TSP.BB{path: [0,1], cost: 10, bound: 62, level: 2})
+    
+    GenStates->>CreateNext: state (%TSP.BB{...}), next_city (2)
+    CreateNext->>CalcNewBound: state (%TSP.BB{level: 1}), from_city (0), to_city (2)
+    CalcNewBound-->>CreateNext: new_bound (60)
+    CreateNext-->>GenStates: new_state (%TSP.BB{path: [0,2], cost: 15, bound: 60, level: 2})
+    
+    GenStates->>CreateNext: state (%TSP.BB{...}), next_city (3)
+    CreateNext->>CalcNewBound: state (%TSP.BB{level: 1}), from_city (0), to_city (3)
+    CalcNewBound-->>CreateNext: new_bound (57)
+    CreateNext-->>GenStates: new_state (%TSP.BB{path: [0,3], cost: 20, bound: 57, level: 2})
+    GenStates-->>BranchBound: next_states ([state1, state2, state3])
+    
+    BranchBound->>FilterStates: states ([...]), best_solution ({:infinity, []})
+    FilterStates-->>BranchBound: promising_states ([state1, state2, state3])
+    
+    BranchBound->>ExploreStates: states ([state1, state2, state3]), best_solution ({:infinity, []})
+    
+    Note over ExploreStates: Exploring state with path [0,1]
+    ExploreStates->>BranchBound: state (%TSP.BB{path: [0,1]}), best_solution ({:infinity, []})
+    
+    Note over BranchBound: Recursively exploring deeper levels...
+    Note over BranchBound: Eventually reaches complete tour [0,1,3,2]
+    
+    BranchBound->>TryComplete: state (%TSP.BB{path: [0,1,3,2], cost: 65, level: 4})
+    TryComplete-->>BranchBound: solution ({80, [0,1,3,2]})
+    
+    BranchBound->>ChooseBetter: solution1 ({80, [0,1,3,2]}), solution2 ({:infinity, []})
+    ChooseBetter-->>BranchBound: better_solution ({80, [0,1,3,2]})
+    
+    Note over ExploreStates: Continue exploring other promising paths...
+    Note over ExploreStates: Pruning occurs when bound + cost >= 80
+    
+    ExploreStates-->>BranchBound: final_solution ({80, [0,1,3,2]})
+    BranchBound-->>Solve: final_solution ({80, [0,1,3,2]})
+    Solve-->>Run: solution ({80, [0,1,3,2]})
+    
+    Run->>CompleteTour: solution ({80, [0,1,3,2]})
+    CompleteTour-->>Run: complete_solution ({80, [0,1,3,2,0]})
+    
+    Run-->>Test: result ({80, [0,1,3,2,0]})
