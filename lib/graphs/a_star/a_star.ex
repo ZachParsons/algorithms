@@ -5,7 +5,7 @@ defmodule Algorithms.Graphs.AStar do
   The A* algorithm is an extension of Dijkstra's algorithm that uses a heuristic function
   to guide the search towards the goal, making it more efficient for pathfinding.
   """
-  alias Algorithms.PriorityQueue
+  alias Algorithms.Collections.Priority
   alias Algorithms.Graphs.Graph.Grid
 
   @doc """
@@ -24,7 +24,7 @@ defmodule Algorithms.Graphs.AStar do
   # Mnemonic:
     Data Flow: graph + heuristic → priority queue + scores → optimal path
     main: initial state (g_scores, came_from, open_set) → search_loop
-    
+
     loop: dequeue lowest f_score node →
     if: goal reached → reconstruct path
     else: process neighbors →
@@ -39,14 +39,14 @@ defmodule Algorithms.Graphs.AStar do
     initial_state = %{
       came_from: %{},
       g_score: %{start => 0},
-      open_set: PriorityQueue.enqueue(PriorityQueue.new(), start, heuristic_fn.(start))
+      open_set: Priority.enqueue(Priority.new(), start, heuristic_fn.(start))
     }
 
     search_loop(graph, heuristic_fn, goal, initial_state)
   end
 
   defp search_loop(graph, heuristic_fn, goal, state) do
-    case PriorityQueue.dequeue(state.open_set) do
+    case Priority.dequeue(state.open_set) do
       {nil, _} ->
         # No path found
         []
@@ -76,7 +76,7 @@ defmodule Algorithms.Graphs.AStar do
         %{
           came_from: Map.put(acc_state.came_from, neighbor, current),
           g_score: Map.put(acc_state.g_score, neighbor, tentative_g_score),
-          open_set: PriorityQueue.enqueue(acc_state.open_set, neighbor, f_score)
+          open_set: Priority.enqueue(acc_state.open_set, neighbor, f_score)
         }
       else
         acc_state

@@ -3,54 +3,54 @@ defmodule Algorithms.Graphs.AStarTest do
   doctest Algorithms.Graphs.Graph
 
   alias Algorithms.Graphs.Graph
-  alias Algorithms.PriorityQueue
+  alias Algorithms.Collections.Priority
 
-  describe "PriorityQueue" do
+  describe "Priority Queue" do
     test "creates empty queue" do
-      queue = PriorityQueue.new()
-      assert PriorityQueue.empty?(queue)
+      queue = Priority.new()
+      assert Priority.empty?(queue)
     end
 
     test "enqueues and dequeues items by priority" do
       queue =
-        PriorityQueue.new()
-        |> PriorityQueue.enqueue(:item_b, 2)
-        |> PriorityQueue.enqueue(:item_a, 1)
-        |> PriorityQueue.enqueue(:item_c, 3)
+        Priority.new()
+        |> Priority.enqueue(:item_b, 2)
+        |> Priority.enqueue(:item_a, 1)
+        |> Priority.enqueue(:item_c, 3)
 
-      refute PriorityQueue.empty?(queue)
+      refute Priority.empty?(queue)
 
-      {item1, queue} = PriorityQueue.dequeue(queue)
+      {item1, queue} = Priority.dequeue(queue)
       assert item1 == :item_a
 
-      {item2, queue} = PriorityQueue.dequeue(queue)
+      {item2, queue} = Priority.dequeue(queue)
       assert item2 == :item_b
 
-      {item3, queue} = PriorityQueue.dequeue(queue)
+      {item3, queue} = Priority.dequeue(queue)
       assert item3 == :item_c
 
-      assert PriorityQueue.empty?(queue)
+      assert Priority.empty?(queue)
     end
 
     test "prevents duplicate items" do
       queue =
-        PriorityQueue.new()
-        |> PriorityQueue.enqueue(:item_a, 1)
+        Priority.new()
+        |> Priority.enqueue(:item_a, 1)
         # Should not be added
-        |> PriorityQueue.enqueue(:item_a, 2)
+        |> Priority.enqueue(:item_a, 2)
 
-      {item, queue} = PriorityQueue.dequeue(queue)
+      {item, queue} = Priority.dequeue(queue)
       assert item == :item_a
-      assert PriorityQueue.empty?(queue)
+      assert Priority.empty?(queue)
     end
 
     test "checks membership" do
       queue =
-        PriorityQueue.new()
-        |> PriorityQueue.enqueue(:item_a, 1)
+        Priority.new()
+        |> Priority.enqueue(:item_a, 1)
 
-      assert PriorityQueue.member?(queue, :item_a)
-      refute PriorityQueue.member?(queue, :item_b)
+      assert Priority.member?(queue, :item_a)
+      refute Priority.member?(queue, :item_b)
     end
   end
 

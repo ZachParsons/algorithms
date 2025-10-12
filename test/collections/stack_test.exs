@@ -1,6 +1,6 @@
 defmodule Algorithms.StackTest do
   use ExUnit.Case
-  alias Algorithms.Stack
+  alias Algorithms.Collections.Stack
 
   describe "push/2" do
     test "inserts into empty stack" do

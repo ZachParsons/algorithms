@@ -1,4 +1,4 @@
-defmodule Algorithms.Stack do
+defmodule Algorithms.Collections.Stack do
   @moduledoc """
     LIFO
   """

@@ -1,6 +1,6 @@
-defmodule Algorithms.QueueTest do
+defmodule Algorithms.Collections.QueueTest do
   use ExUnit.Case
-  alias Algorithms.Queue
+  alias Algorithms.Collections.Queue
 
   describe "enqueue/2" do
     test "empty queue" do

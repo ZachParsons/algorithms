@@ -1,4 +1,4 @@
-defmodule Algorithms.Queue do
+defmodule Algorithms.Collections.Queue do
   @moduledoc """
     FIFO
   """

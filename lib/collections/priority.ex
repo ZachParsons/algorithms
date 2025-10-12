@@ -1,4 +1,4 @@
-defmodule Algorithms.PriorityQueue do
+defmodule Algorithms.Collections.Priority do
   @moduledoc """
   A simple priority queue implementation using a list of {priority, item} tuples.
   Items with lower priority values are dequeued first.
