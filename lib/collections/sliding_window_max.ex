@@ -5,6 +5,12 @@ defmodule Algorithms.Collections.SlidingWindowMax do
   Given an array of integers and a window size k, returns an array containing
   the maximum value in each sliding window of size k.
 
+  Mnemonic:
+  Store: Deque holds indices in decreasing value order (largest first)
+  Slide: Remove indices outside current window from front
+  Shrink: Remove indices with smaller values from back (they can't be max)
+  Add: Append current index to back, front index gives window maximum
+
   Time Complexity: O(n)
   Space Complexity: O(k)
   """
