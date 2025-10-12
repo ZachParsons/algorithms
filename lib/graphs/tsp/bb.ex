@@ -22,11 +22,11 @@ defmodule Algorithms.Graphs.TSP.BB do
   """
 
   # State structure for TSP search
-  defstruct [:matrix, :n, :visited, :path, :cost, :bound, :level]
+  defstruct [:matrix, :city_count, :visited, :path, :cost, :bound, :level]
 
   @type tsp_state :: %__MODULE__{
           matrix: [[non_neg_integer()]],
-          n: non_neg_integer(),
+          city_count: non_neg_integer(),
           visited: MapSet.t(non_neg_integer()),
           path: [non_neg_integer()],
           cost: non_neg_integer(),
@@ -64,76 +64,25 @@ defmodule Algorithms.Graphs.TSP.BB do
     |> complete_tour()
   end
 
+  # CREATE - Generate new data structures and states
   # Create initial state for the TSP search
   @spec create_initial_state([[non_neg_integer()]]) :: tsp_state() | solution()
   defp create_initial_state([]), do: {0, []}
   defp create_initial_state([_]), do: {0, [0]}
 
   defp create_initial_state(matrix) do
-    n = length(matrix)
+    city_count = length(matrix)
     initial_bound = calculate_lower_bound(matrix)
 
     %__MODULE__{
       matrix: matrix,
-      n: n,
+      city_count: city_count,
       visited: MapSet.new([0]),
       path: [0],
       cost: 0,
       bound: initial_bound,
       level: 1
     }
-  end
-
-  # Main solver function using functional approach
-  @spec solve(tsp_state() | solution()) :: solution()
-  # Base case for trivial solutions
-  defp solve({cost, path}), do: {cost, path}
-
-  defp solve(state) do
-    state
-    |> branch_and_bound({:infinity, []})
-  end
-
-  # Complete the tour by adding return to start city
-  @spec complete_tour(solution()) :: solution()
-  defp complete_tour({cost, path}) when length(path) <= 1, do: {cost, path}
-  defp complete_tour({cost, path}), do: {cost, path ++ [0]}
-
-  # Branch and bound recursive search
-  @spec branch_and_bound(tsp_state(), solution()) :: solution()
-  defp branch_and_bound(%{level: level, n: n} = state, best_solution) when level == n do
-    state
-    |> try_complete_tour()
-    |> choose_better_solution(best_solution)
-  end
-
-  defp branch_and_bound(state, best_solution) do
-    state
-    |> generate_next_states()
-    |> filter_promising_states(best_solution)
-    |> explore_states(best_solution)
-  end
-
-  # Try to complete the tour from current state
-  @spec try_complete_tour(tsp_state()) :: solution()
-  defp try_complete_tour(%{matrix: matrix, path: path, cost: cost}) do
-    last_city = List.last(path)
-    return_cost = get_edge_cost(matrix, last_city, 0)
-
-    if return_cost > 0 do
-      {cost + return_cost, path}
-    else
-      {:infinity, []}
-    end
-  end
-
-  # Generate all possible next states from current state
-  @spec generate_next_states(tsp_state()) :: [tsp_state()]
-  defp generate_next_states(state = %{n: n}) do
-    0..(n - 1)
-    |> Enum.reject(&MapSet.member?(state.visited, &1))
-    |> Enum.map(&create_next_state(state, &1))
-    |> Enum.reject(&is_nil/1)
   end
 
   # Create next state by visiting a specific city
@@ -159,76 +108,21 @@ defmodule Algorithms.Graphs.TSP.BB do
     end
   end
 
-  # Filter states that are promising (bound + cost < best known solution)
-  @spec filter_promising_states([tsp_state()], solution()) :: [tsp_state()]
-  defp filter_promising_states(states, {:infinity, _}), do: states
-
-  defp filter_promising_states(states, {best_cost, _}) do
-    states
-    |> Enum.filter(fn %{bound: bound, cost: cost} ->
-      bound + cost < best_cost
-    end)
+  # Generate all possible next states from current state
+  @spec generate_next_states(tsp_state()) :: [tsp_state()]
+  defp generate_next_states(state = %{city_count: city_count}) do
+    0..(city_count - 1)
+    |> Enum.reject(&MapSet.member?(state.visited, &1))
+    |> Enum.map(&create_next_state(state, &1))
+    |> Enum.reject(&is_nil/1)
   end
 
-  # Explore all promising states and find the best solution
-  @spec explore_states([tsp_state()], solution()) :: solution()
-  defp explore_states([], best_solution), do: best_solution
+  # Complete the tour by adding return to start city
+  @spec complete_tour(solution()) :: solution()
+  defp complete_tour({cost, path}) when length(path) <= 1, do: {cost, path}
+  defp complete_tour({cost, path}), do: {cost, path ++ [0]}
 
-  defp explore_states([state | rest], best_solution) do
-    new_solution = branch_and_bound(state, best_solution)
-    better_solution = choose_better_solution(new_solution, best_solution)
-    explore_states(rest, better_solution)
-  end
-
-  # Choose the better of two solutions
-  @spec choose_better_solution(solution(), solution()) :: solution()
-  defp choose_better_solution({:infinity, _}, solution2), do: solution2
-  defp choose_better_solution(solution1, {:infinity, _}), do: solution1
-  defp choose_better_solution({cost1, path1}, {cost2, _}) when cost1 < cost2, do: {cost1, path1}
-  defp choose_better_solution(_, solution2), do: solution2
-
-  # Calculate lower bound for the entire matrix
-  @spec calculate_lower_bound([[non_neg_integer()]]) :: non_neg_integer()
-  defp calculate_lower_bound(matrix) do
-    matrix
-    |> Enum.with_index()
-    |> Enum.map(fn {row, vertex} ->
-      {first_min, second_min} = find_two_minimums(row, vertex)
-      first_min + second_min
-    end)
-    |> Enum.sum()
-    |> then(&div(&1 + 1, 2))
-  end
-
-  # Calculate new bound when transitioning to next city
-  @spec calculate_new_bound(tsp_state(), non_neg_integer(), non_neg_integer()) ::
-          non_neg_integer()
-  defp calculate_new_bound(%{matrix: matrix, bound: curr_bound, level: level}, from_city, to_city) do
-    reduction =
-      case level do
-        1 -> div(first_min(matrix, from_city) + first_min(matrix, to_city), 2)
-        _ -> div(second_min(matrix, from_city) + first_min(matrix, to_city), 2)
-      end
-
-    curr_bound - reduction
-  end
-
-  # Find the two minimum edge costs for a given vertex
-  @spec find_two_minimums([non_neg_integer()], non_neg_integer()) ::
-          {non_neg_integer(), non_neg_integer()}
-  defp find_two_minimums(row, vertex_index) do
-    row
-    |> Enum.with_index()
-    |> Enum.reject(fn {cost, idx} -> idx == vertex_index or cost == 0 end)
-    |> Enum.map(fn {cost, _idx} -> cost end)
-    |> Enum.sort()
-    |> case do
-      [] -> {0, 0}
-      [min] -> {min, 0}
-      [first, second | _] -> {first, second}
-    end
-  end
-
+  # READ - Query and retrieve data from existing structures
   # Get edge cost between two cities
   @spec get_edge_cost([[non_neg_integer()]], non_neg_integer(), non_neg_integer()) ::
           non_neg_integer()
@@ -262,6 +156,22 @@ defmodule Algorithms.Graphs.TSP.BB do
     end
   end
 
+  # Find the two minimum edge costs for a given vertex
+  @spec find_two_minimums([non_neg_integer()], non_neg_integer()) ::
+          {non_neg_integer(), non_neg_integer()}
+  defp find_two_minimums(row, vertex_index) do
+    row
+    |> Enum.with_index()
+    |> Enum.reject(fn {cost, idx} -> idx == vertex_index or cost == 0 end)
+    |> Enum.map(fn {cost, _idx} -> cost end)
+    |> Enum.sort()
+    |> case do
+      [] -> {0, 0}
+      [min] -> {min, 0}
+      [first, second | _] -> {first, second}
+    end
+  end
+
   # Extract valid costs (non-zero, not self-loop)
   @spec extract_valid_costs([non_neg_integer()], non_neg_integer()) :: [non_neg_integer()]
   defp extract_valid_costs(row, vertex_index) do
@@ -269,5 +179,100 @@ defmodule Algorithms.Graphs.TSP.BB do
     |> Enum.with_index()
     |> Enum.reject(fn {cost, idx} -> idx == vertex_index or cost == 0 end)
     |> Enum.map(fn {cost, _idx} -> cost end)
+  end
+
+  # Calculate lower bound for the entire matrix
+  @spec calculate_lower_bound([[non_neg_integer()]]) :: non_neg_integer()
+  defp calculate_lower_bound(matrix) do
+    matrix
+    |> Enum.with_index()
+    |> Enum.map(fn {row, vertex} ->
+      {first_min, second_min} = find_two_minimums(row, vertex)
+      first_min + second_min
+    end)
+    |> Enum.sum()
+    |> then(&div(&1 + 1, 2))
+  end
+
+  # Calculate new bound when transitioning to next city
+  @spec calculate_new_bound(tsp_state(), non_neg_integer(), non_neg_integer()) ::
+          non_neg_integer()
+  defp calculate_new_bound(%{matrix: matrix, bound: curr_bound, level: level}, from_city, to_city) do
+    reduction =
+      case level do
+        1 -> div(first_min(matrix, from_city) + first_min(matrix, to_city), 2)
+        _ -> div(second_min(matrix, from_city) + first_min(matrix, to_city), 2)
+      end
+
+    curr_bound - reduction
+  end
+
+  # UPDATE - Transform and modify existing data structures
+  # Main solver function using functional approach
+  @spec solve(tsp_state() | solution()) :: solution()
+  # Base case for trivial solutions
+  defp solve({cost, path}), do: {cost, path}
+
+  defp solve(state) do
+    state
+    |> branch_and_bound({:infinity, []})
+  end
+
+  # Branch and bound recursive search
+  @spec branch_and_bound(tsp_state(), solution()) :: solution()
+  defp branch_and_bound(%{level: level, city_count: city_count} = state, best_solution)
+       when level == city_count do
+    state
+    |> try_complete_tour()
+    |> choose_better_solution(best_solution)
+  end
+
+  defp branch_and_bound(state, best_solution) do
+    state
+    |> generate_next_states()
+    |> filter_promising_states(best_solution)
+    |> explore_states(best_solution)
+  end
+
+  # Try to complete the tour from current state
+  @spec try_complete_tour(tsp_state()) :: solution()
+  defp try_complete_tour(%{matrix: matrix, path: path, cost: cost}) do
+    last_city = List.last(path)
+    return_cost = get_edge_cost(matrix, last_city, 0)
+
+    if return_cost > 0 do
+      {cost + return_cost, path}
+    else
+      {:infinity, []}
+    end
+  end
+
+  # Explore all promising states and find the best solution
+  @spec explore_states([tsp_state()], solution()) :: solution()
+  defp explore_states([], best_solution), do: best_solution
+
+  defp explore_states([state | rest], best_solution) do
+    new_solution = branch_and_bound(state, best_solution)
+    better_solution = choose_better_solution(new_solution, best_solution)
+    explore_states(rest, better_solution)
+  end
+
+  # Choose the better of two solutions
+  @spec choose_better_solution(solution(), solution()) :: solution()
+  defp choose_better_solution({:infinity, _}, solution2), do: solution2
+  defp choose_better_solution(solution1, {:infinity, _}), do: solution1
+  defp choose_better_solution({cost1, path1}, {cost2, _}) when cost1 < cost2, do: {cost1, path1}
+  defp choose_better_solution(_, solution2), do: solution2
+
+  # DELETE - Filter and remove unwanted data
+  # Filter states that are promising (bound + cost < best known solution)
+  @spec filter_promising_states([tsp_state()], solution()) :: [tsp_state()]
+  defp filter_promising_states(states, {:infinity, _}), do: states
+
+  defp filter_promising_states(states, {best_cost, _}) do
+    states
+    |> Enum.filter(fn %{bound: bound, cost: cost} ->
+      bound + cost < best_cost
+    end)
   end
 end
