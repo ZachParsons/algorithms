@@ -188,9 +188,10 @@ defmodule Algorithms.Graphs.Graph do
       for {from, neighbors} <- graph.nodes,
           {to, current_cost} <- neighbors do
         new_cost =
-          cond do
-            from in barriers or to in barriers -> barrier_cost
-            true -> current_cost
+          if from in barriers or to in barriers do
+            barrier_cost
+          else
+            current_cost
           end
 
         {from, to, new_cost}

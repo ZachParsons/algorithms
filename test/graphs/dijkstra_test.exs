@@ -810,10 +810,10 @@ defmodule Algorithms.Graphs.DijkstraTest do
       |> Enum.reduce(base_graph, fn node, acc ->
         # Add a self-loop with weight 0 to ensure node exists in graph
         # This will be ignored during shortest path calculation since we start from source
-        if node not in WeightedGraph.all_nodes(acc) do
-          WeightedGraph.add_edge(acc, node, node, 0)
-        else
+        if node in WeightedGraph.all_nodes(acc) do
           acc
+        else
+          WeightedGraph.add_edge(acc, node, node, 0)
         end
       end)
 

@@ -65,18 +65,19 @@ defmodule ShortestCommonSupersequence.DPMatrix do
   defp update_matrix(matrix, i, j, value) do
     matrix
     |> Enum.with_index()
-    |> Enum.map(fn {row, row_idx} ->
-      if row_idx == i do
-        row
-        |> Enum.with_index()
-        |> Enum.map(fn {cell, col_idx} ->
-          if col_idx == j, do: value, else: cell
-        end)
-      else
-        row
-      end
-    end)
+    |> Enum.map(&update_row_if_matches(&1, i, j, value))
   end
+
+  defp update_row_if_matches({row, row_idx}, i, j, value) when row_idx == i do
+    row
+    |> Enum.with_index()
+    |> Enum.map(&update_cell_if_matches(&1, j, value))
+  end
+
+  defp update_row_if_matches({row, _row_idx}, _i, _j, _value), do: row
+
+  defp update_cell_if_matches({_cell, col_idx}, j, value) when col_idx == j, do: value
+  defp update_cell_if_matches({cell, _col_idx}, _j, _value), do: cell
 
   # Construct the shortest common supersequence using the DP matrix
   @spec construct_supersequence(

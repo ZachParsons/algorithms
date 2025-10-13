@@ -186,10 +186,12 @@ defmodule Algorithms.NQueens.Backtracking do
     # row contains column positions for each row (in reverse order)
     row
     |> Enum.reverse()
-    |> Enum.map(fn col ->
-      Enum.map_join(0..(n - 1), fn i ->
-        if i == col, do: "Q", else: "."
-      end)
+    |> Enum.map(&format_board_row(&1, n))
+  end
+
+  defp format_board_row(col, n) do
+    Enum.map_join(0..(n - 1), fn i ->
+      if i == col, do: "Q", else: "."
     end)
   end
 end
