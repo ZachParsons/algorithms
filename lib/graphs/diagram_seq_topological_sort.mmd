@@ -1,0 +1,46 @@
+sequenceDiagram
+    participant Test as TopologicalSortTest
+    participant Run as run/2
+    participant BuildGraph as build_graph/2
+    participant ProcessQueue as process_queue/5
+
+    Note over Test: Test case 1: courses_count=2, prereqs=[[1,0]]
+    
+    Test->>Run: course_count (Integer, 2), prereqs (List, [[1,0]])
+    
+    Run->>BuildGraph: course_count (Integer, 2), prereqs (List, [[1,0]])
+    Note over BuildGraph: Initialize adj_list: %{0 => [], 1 => []}
+    Note over BuildGraph: Initialize in_degree: %{}
+    Note over BuildGraph: Process [1,0]: prereq=0, course=1
+    Note over BuildGraph: Update adj_list: %{0 => [1], 1 => []}
+    Note over BuildGraph: Update in_degree: %{1 => 1}
+    BuildGraph-->>Run: {adj_list (Map, %{0 => [1], 1 => []}), in_degree (Map, %{1 => 1})}
+    
+    Note over Run: Filter courses with in_degree=0
+    Note over Run: Course 0: in_degree=0 ✓, Course 1: in_degree=1 ✗
+    Note over Run: queue = [0]
+    
+    Run->>ProcessQueue: queue (List, [0]), adj_list (Map, %{0 => [1], 1 => []}), in_degree (Map, %{1 => 1}), processed_count (Integer, 0), course_count (Integer, 2)
+    
+    Note over ProcessQueue: Process current=0, rest=[]
+    Note over ProcessQueue: neighbors = [1]
+    Note over ProcessQueue: Reduce in_degree of neighbor 1: 1-1=0
+    Note over ProcessQueue: Add neighbor 1 to queue (in_degree=0)
+    Note over ProcessQueue: new_queue = [1], new_in_degree = %{1 => 0}
+    
+    ProcessQueue->>ProcessQueue: queue (List, [1]), adj_list (Map, %{0 => [1], 1 => []}), in_degree (Map, %{1 => 0}), processed_count (Integer, 1), course_count (Integer, 2)
+    
+    Note over ProcessQueue: Process current=1, rest=[]
+    Note over ProcessQueue: neighbors = []
+    Note over ProcessQueue: No neighbors to process
+    Note over ProcessQueue: new_queue = [], new_in_degree = %{1 => 0}
+    
+    ProcessQueue->>ProcessQueue: queue (List, []), adj_list (Map, %{0 => [1], 1 => []}), in_degree (Map, %{1 => 0}), processed_count (Integer, 2), course_count (Integer, 2)
+    
+    Note over ProcessQueue: Base case: queue is empty
+    Note over ProcessQueue: processed_count (2) == course_count (2)
+    ProcessQueue-->>Run: result (Boolean, true)
+    
+    Run-->>Test: result (Boolean, true)
+    
+    Note over Test: Assert result == true ✓
