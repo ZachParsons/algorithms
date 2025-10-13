@@ -1,76 +1,130 @@
 sequenceDiagram
-    participant Main as run/2
+    participant Main as run0/2
     participant Reduce as Enum.reduce/3
     participant RemoveWindow as remove_out_of_window/3
     participant RemoveSmaller as remove_smaller_elements/3
+    participant Queue as :queue
 
     Main->>Main: nums=[1,3,-1,-3,5,3,6,7], window_size=3
-    Main->>Main: indexed_nums=[(1,0),(3,1),(-1,2),(-3,3),(5,4),(3,5),(6,6),(7,7)]
-    Main->>Reduce: indexed_nums, {[], []}
+    Main->>Main: nums_tuple={1,3,-1,-3,5,3,6,7}, n=8
+    Main->>Reduce: 0..7, {[], :queue.new()}
 
-    Note over Reduce: Processing (1,0)
-    Reduce->>RemoveWindow: deque=[], index=0, window_size=3
-    RemoveWindow-->>Reduce: deque=[]
-    Reduce->>RemoveSmaller: deque=[], num=1, nums=[1,3,-1,-3,5,3,6,7]
-    RemoveSmaller-->>Reduce: deque=[]
-    Note over Reduce: deque=[0], index=0 < 2, no result yet
-    Reduce-->>Main: {[], [0]}
+    Note over Reduce: Processing index=0, current_num=1
+    Reduce->>RemoveWindow: deque=:queue.new(), index=0, window_size=3
+    RemoveWindow-->>Reduce: deque=:queue.new() (empty queue)
+    Reduce->>RemoveSmaller: deque=:queue.new(), current_num=1, nums_tuple
+    RemoveSmaller-->>Reduce: deque=:queue.new() (empty queue)
+    Reduce->>Queue: :queue.in(0, deque)
+    Queue-->>Reduce: deque with index 0
+    Note over Reduce: index=0 < 2, no result yet
+    Reduce-->>Main: {[], deque=[0]}
 
-    Note over Reduce: Processing (3,1)
+    Note over Reduce: Processing index=1, current_num=3
     Reduce->>RemoveWindow: deque=[0], index=1, window_size=3
-    RemoveWindow-->>Reduce: deque=[0]
-    Reduce->>RemoveSmaller: deque=[0], num=3, nums=[1,3,-1,-3,5,3,6,7]
-    RemoveSmaller-->>Reduce: deque=[] (removed index 0, nums[0]=1 <= 3)
-    Note over Reduce: deque=[1], index=1 < 2, no result yet
-    Reduce-->>Main: {[], [1]}
+    RemoveWindow-->>Reduce: deque=[0] (0 > 1-3=-2, keep)
+    Reduce->>RemoveSmaller: deque=[0], current_num=3, nums_tuple
+    Note over RemoveSmaller: elem(nums_tuple, 0)=1 <= 3, remove
+    Reduce->>Queue: :queue.out_r(deque)
+    Queue-->>RemoveSmaller: {{:value, 0}, empty_deque}
+    RemoveSmaller-->>Reduce: deque=:queue.new()
+    Reduce->>Queue: :queue.in(1, deque)
+    Queue-->>Reduce: deque with index 1
+    Note over Reduce: index=1 < 2, no result yet
+    Reduce-->>Main: {[], deque=[1]}
 
-    Note over Reduce: Processing (-1,2)
+    Note over Reduce: Processing index=2, current_num=-1
     Reduce->>RemoveWindow: deque=[1], index=2, window_size=3
-    RemoveWindow-->>Reduce: deque=[1]
-    Reduce->>RemoveSmaller: deque=[1], num=-1, nums=[1,3,-1,-3,5,3,6,7]
-    RemoveSmaller-->>Reduce: deque=[1] (nums[1]=3 > -1, keep)
-    Note over Reduce: deque=[1,2], index=2 >= 2, add max
-    Note over Reduce: max_index=1, max_value=nums[1]=3
-    Reduce-->>Main: {[3], [1,2]}
+    RemoveWindow-->>Reduce: deque=[1] (1 > 2-3=-1, keep)
+    Reduce->>RemoveSmaller: deque=[1], current_num=-1, nums_tuple
+    Note over RemoveSmaller: elem(nums_tuple, 1)=3 > -1, keep
+    RemoveSmaller-->>Reduce: deque=[1]
+    Reduce->>Queue: :queue.in(2, deque)
+    Queue-->>Reduce: deque with indices [1,2]
+    Note over Reduce: index=2 >= 2, add result
+    Reduce->>Queue: :queue.out(deque)
+    Queue-->>Reduce: {{:value, 1}, remaining_deque}
+    Note over Reduce: max_value=elem(nums_tuple, 1)=3
+    Reduce-->>Main: {[3], deque=[1,2]}
 
-    Note over Reduce: Processing (-3,3)
+    Note over Reduce: Processing index=3, current_num=-3
     Reduce->>RemoveWindow: deque=[1,2], index=3, window_size=3
     RemoveWindow-->>Reduce: deque=[1,2] (1 > 3-3=0, 2 > 0, keep both)
-    Reduce->>RemoveSmaller: deque=[1,2], num=-3, nums=[1,3,-1,-3,5,3,6,7]
-    RemoveSmaller-->>Reduce: deque=[1,2] (nums[2]=-1 > -3, nums[1]=3 > -3, keep both)
-    Note over Reduce: deque=[1,2,3], max_index=1, max_value=3
-    Reduce-->>Main: {[3,3], [1,2,3]}
+    Reduce->>RemoveSmaller: deque=[1,2], current_num=-3, nums_tuple
+    Note over RemoveSmaller: elem(nums_tuple, 2)=-1 > -3, elem(nums_tuple, 1)=3 > -3, keep both
+    RemoveSmaller-->>Reduce: deque=[1,2]
+    Reduce->>Queue: :queue.in(3, deque)
+    Queue-->>Reduce: deque with indices [1,2,3]
+    Reduce->>Queue: :queue.out(deque)
+    Queue-->>Reduce: {{:value, 1}, remaining_deque}
+    Note over Reduce: max_value=elem(nums_tuple, 1)=3
+    Reduce-->>Main: {[3,3], deque=[1,2,3]}
 
-    Note over Reduce: Processing (5,4)
+    Note over Reduce: Processing index=4, current_num=5
     Reduce->>RemoveWindow: deque=[1,2,3], index=4, window_size=3
-    RemoveWindow-->>Reduce: deque=[2,3] (removed 1, since 1 <= 4-3=1)
-    Reduce->>RemoveSmaller: deque=[2,3], num=5, nums=[1,3,-1,-3,5,3,6,7]
-    RemoveSmaller-->>Reduce: deque=[] (removed 3,2 since nums[3]=-3 <= 5, nums[2]=-1 <= 5)
-    Note over Reduce: deque=[4], max_index=4, max_value=5
-    Reduce-->>Main: {[3,3,5], [4]}
+    Note over RemoveWindow: 1 <= 4-3=1, remove index 1
+    Reduce->>Queue: :queue.out(deque)
+    Queue-->>RemoveWindow: {{:value, 1}, deque=[2,3]}
+    RemoveWindow-->>Reduce: deque=[2,3]
+    Reduce->>RemoveSmaller: deque=[2,3], current_num=5, nums_tuple
+    Note over RemoveSmaller: elem(nums_tuple, 3)=-3 <= 5, remove
+    Reduce->>Queue: :queue.out_r(deque)
+    Queue-->>RemoveSmaller: {{:value, 3}, deque=[2]}
+    Note over RemoveSmaller: elem(nums_tuple, 2)=-1 <= 5, remove
+    Reduce->>Queue: :queue.out_r(deque)
+    Queue-->>RemoveSmaller: {{:value, 2}, empty_deque}
+    RemoveSmaller-->>Reduce: deque=:queue.new()
+    Reduce->>Queue: :queue.in(4, deque)
+    Queue-->>Reduce: deque with index 4
+    Reduce->>Queue: :queue.out(deque)
+    Queue-->>Reduce: {{:value, 4}, remaining_deque}
+    Note over Reduce: max_value=elem(nums_tuple, 4)=5
+    Reduce-->>Main: {[5,3,3], deque=[4]}
 
-    Note over Reduce: Processing (3,5)
+    Note over Reduce: Processing index=5, current_num=3
     Reduce->>RemoveWindow: deque=[4], index=5, window_size=3
     RemoveWindow-->>Reduce: deque=[4] (4 > 5-3=2, keep)
-    Reduce->>RemoveSmaller: deque=[4], num=3, nums=[1,3,-1,-3,5,3,6,7]
-    RemoveSmaller-->>Reduce: deque=[4] (nums[4]=5 > 3, keep)
-    Note over Reduce: deque=[4,5], max_index=4, max_value=5
-    Reduce-->>Main: {[3,3,5,5], [4,5]}
+    Reduce->>RemoveSmaller: deque=[4], current_num=3, nums_tuple
+    Note over RemoveSmaller: elem(nums_tuple, 4)=5 > 3, keep
+    RemoveSmaller-->>Reduce: deque=[4]
+    Reduce->>Queue: :queue.in(5, deque)
+    Queue-->>Reduce: deque with indices [4,5]
+    Reduce->>Queue: :queue.out(deque)
+    Queue-->>Reduce: {{:value, 4}, remaining_deque}
+    Note over Reduce: max_value=elem(nums_tuple, 4)=5
+    Reduce-->>Main: {[5,5,3,3], deque=[4,5]}
 
-    Note over Reduce: Processing (6,6)
+    Note over Reduce: Processing index=6, current_num=6
     Reduce->>RemoveWindow: deque=[4,5], index=6, window_size=3
     RemoveWindow-->>Reduce: deque=[4,5] (4 > 6-3=3, 5 > 3, keep both)
-    Reduce->>RemoveSmaller: deque=[4,5], num=6, nums=[1,3,-1,-3,5,3,6,7]
-    RemoveSmaller-->>Reduce: deque=[] (removed 5,4 since nums[5]=3 <= 6, nums[4]=5 <= 6)
-    Note over Reduce: deque=[6], max_index=6, max_value=6
-    Reduce-->>Main: {[3,3,5,5,6], [6]}
+    Reduce->>RemoveSmaller: deque=[4,5], current_num=6, nums_tuple
+    Note over RemoveSmaller: elem(nums_tuple, 5)=3 <= 6, remove
+    Reduce->>Queue: :queue.out_r(deque)
+    Queue-->>RemoveSmaller: {{:value, 5}, deque=[4]}
+    Note over RemoveSmaller: elem(nums_tuple, 4)=5 <= 6, remove
+    Reduce->>Queue: :queue.out_r(deque)
+    Queue-->>RemoveSmaller: {{:value, 4}, empty_deque}
+    RemoveSmaller-->>Reduce: deque=:queue.new()
+    Reduce->>Queue: :queue.in(6, deque)
+    Queue-->>Reduce: deque with index 6
+    Reduce->>Queue: :queue.out(deque)
+    Queue-->>Reduce: {{:value, 6}, remaining_deque}
+    Note over Reduce: max_value=elem(nums_tuple, 6)=6
+    Reduce-->>Main: {[6,5,5,3,3], deque=[6]}
 
-    Note over Reduce: Processing (7,7)
+    Note over Reduce: Processing index=7, current_num=7
     Reduce->>RemoveWindow: deque=[6], index=7, window_size=3
     RemoveWindow-->>Reduce: deque=[6] (6 > 7-3=4, keep)
-    Reduce->>RemoveSmaller: deque=[6], num=7, nums=[1,3,-1,-3,5,3,6,7]
-    RemoveSmaller-->>Reduce: deque=[] (removed 6 since nums[6]=6 <= 7)
-    Note over Reduce: deque=[7], max_index=7, max_value=7
-    Reduce-->>Main: {[3,3,5,5,6,7], [7]}
+    Reduce->>RemoveSmaller: deque=[6], current_num=7, nums_tuple
+    Note over RemoveSmaller: elem(nums_tuple, 6)=6 <= 7, remove
+    Reduce->>Queue: :queue.out_r(deque)
+    Queue-->>RemoveSmaller: {{:value, 6}, empty_deque}
+    RemoveSmaller-->>Reduce: deque=:queue.new()
+    Reduce->>Queue: :queue.in(7, deque)
+    Queue-->>Reduce: deque with index 7
+    Reduce->>Queue: :queue.out(deque)
+    Queue-->>Reduce: {{:value, 7}, remaining_deque}
+    Note over Reduce: max_value=elem(nums_tuple, 7)=7
+    Reduce-->>Main: {[7,6,5,5,3,3], deque=[7]}
 
+    Main->>Main: Enum.reverse([7,6,5,5,3,3])
     Main-->>Main: result=[3,3,5,5,6,7]
