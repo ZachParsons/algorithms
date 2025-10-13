@@ -5,16 +5,16 @@ defmodule Algorithms.Graphs.TopologicalSortTest do
   test "1" do
     courses_count = 2
     prereqs = [[1, 0]]
-    output = true
+    expected = true
     res = TopologicalSort.run(courses_count, prereqs)
-    assert res == output
+    assert res == expected
   end
 
   test "2" do
     courses_count = 2
     prereqs = [[1, 0], [0, 1]]
-    output = false
+    expected = false
     res = TopologicalSort.run(courses_count, prereqs)
-    assert res == output
+    assert res == expected
   end
 end
