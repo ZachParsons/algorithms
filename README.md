@@ -1,3 +1,3 @@
-# Algorithms Workflow
+# Algorithms
 
-_Redacted from git history: workflow notes now live in an encrypted docs/workflow.md (see git-crypt)._
+Algorithm implementations in Elixir, with tests, diagrams, documentation.
