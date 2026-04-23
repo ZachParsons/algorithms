@@ -43,6 +43,19 @@ defmodule Algorithms.NQueens.Backtracking do
   - Production: `run2` (fastest) or `run0` (clarity/performance balance)
   - Education: `run0` (fundamentals) or `run2` (optimization techniques)
   - Research: `run1` (alternative approaches)
+
+  Triadic Pseudocode Protocol:
+    ALGO NQueens(n)
+    ├── DATA: IN: n → OUT: valid board[]
+    │   └── BOARD: n x n, row positions[]
+    ├── ENUMERATE: RECURSE row=0 to n-1
+    └── CONDITIONAL:
+        └── FOR col=0 to n-1:
+            ├── IF safe(row, col) [no attacks]:
+            │   ├── PLACE queen at (row,col)
+            │   └── RECURSE row+1
+            │       ├── IF row==n → SUCCESS
+            │       └── BACKTRACK: unplace
   """
 
   ## Mnemonic for run0

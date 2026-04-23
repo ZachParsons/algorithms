@@ -11,6 +11,20 @@ defmodule Algorithms.Graphs.TopologicalSort do
   Queue: courses with zero dependencies (in_degree = 0)
   Process: pop course → decrement neighbors' in_degrees → queue newly freed courses
   Validate: processed_count = total_courses (no cycle detected)
+
+  Triadic Pseudocode Protocol:
+    ALGO TopoSort(graph)  # Kahn's (Queue) or DFS
+    ├── DATA: IN: graph → OUT: ordered nodes[]
+    │   ├── INDEGREE[]: incoming edges
+    │   └── QUEUE: zero-indegree nodes
+    ├── ENUMERATE: WHILE QUEUE:
+    │   └── u ← POP queue
+    │   └── ADD u to order
+    └── CONDITIONAL:
+        └── FOR neighbor v of u:
+            ├── INDEGREE[v]--
+            └── IF INDEGREE[v]==0 → PUSH v
+        └── IF |order| < |nodes| → cycle!
   """
 
   def run(course_count, prereqs) do

@@ -19,6 +19,18 @@ defmodule Algorithms.Graphs.TSP.BB do
 
   Time Complexity: O(n!) in worst case, but typically much better due to pruning
   Space Complexity: O(n) for the recursion stack and visited set
+
+  Triadic Pseudocode Protocol:
+    ALGO TSP_BnB(dist[n][n])
+    ├── DATA: IN: n cities dist matrix → OUT: min tour cost
+    │   ├── PATH: current partial tour
+    │   ├── best: current min full tour
+    │   └── BOUND: lower bound for partial
+    ├── ENUMERATE: DFS on partial tours (next city)
+    └── CONDITIONAL/PRUNE:
+        ├── IF partial_cost + bound >= best → PRUNE branch
+        ├── IF visited all → UPDATE best if partial < best
+        └── ELSE → EXPAND unvisited cities
   """
 
   # State structure for TSP search

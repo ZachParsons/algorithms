@@ -4,6 +4,18 @@ defmodule Algorithms.Sorting.Quicksort do
   from the array and partitioning the other elements into two sub-arrays according to
   whether they are less than or greater than the pivot.
 
+  Triadic Pseudocode Protocol:
+    ALGO Quicksort(arr, lo, hi)
+    ├── DATA: IN: unsorted arr[lo..hi] → OUT: sorted arr
+    │   └── PARTITION: pivot index
+    ├── ENUMERATE: IF lo < hi → RECURSE
+    │   ├── PARTITION around pivot
+    │   └── Quicksort(lo, pivot-1) + Quicksort(pivot+1, hi)
+    └── CONDITIONAL (Partition):
+        ├── SWAP < pivot → left
+        ├── SWAP > pivot → right
+        └── pivot ← final position
+
   Mnemonic:
     Two clauses
     Pick first element as pivot

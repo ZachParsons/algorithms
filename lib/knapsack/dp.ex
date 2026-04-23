@@ -36,6 +36,16 @@ defmodule Algorithms.Knapsack.DP do
       DynamicProgramming.run(items, 50)
       # Returns: {220, [1, 2]} - optimal value 220 with items at indices 1,2
 
+  Triadic Pseudocode Protocol:
+    ALGO Knapsack(items, W)
+    ├── DATA: IN: items(weight[], value[]), capacity W → OUT: maxValue
+    │   └── MEMO: dp[i][w] = max value with first i items, cap w
+    ├── ENUMERATE: FOR i=1 to n
+    │   └── FOR w=0 to W
+    └── CONDITIONAL:
+        ├── IF weight[i] > w → dp[i][w] ← dp[i-1][w]
+        └── ELSE → dp[i][w] ← MAX(dp[i-1][w], value[i] + dp[i-1][w-weight[i]])
+        └── RETURN dp[n][W]
 
   Mnemonic:
 

@@ -20,6 +20,22 @@ defmodule Algorithms.Graphs.AStar do
   ## Returns
   - List of positions representing the optimal path, or empty list if no path found
 
+  Triadic Pseudocode Protocol:
+    ALGO Astar(graph, start, goal)
+    ├── DATA: IN: graph, start, goal → OUT: path[]
+    │   ├── PQ: min-heap (f=g+h, node)
+    │   ├── cameFrom[], gScore[]: ∞ init, fScore[]: ∞ init
+    ├── ENUMERATE: WHILE PQ not empty
+    │   └── current ← POP lowest fScore
+    └── CONDITIONAL:
+        ├── IF current == goal → RECONSTRUCT path
+        └── FOR neighbor neigh:
+            ├── tent_g ← gScore[current] + dist(current,neigh)
+            ├── IF tent_g < gScore[neigh]:
+            │   ├── cameFrom[neigh] ← current
+            │   ├── gScore[neigh] ← tent_g
+            │   ├── fScore[neigh] ← tent_g + heuristic(neigh, goal)
+            │   └── PUSH neigh to PQ
 
   # Mnemonic:
     Data Flow: graph + heuristic → priority queue + scores → optimal path

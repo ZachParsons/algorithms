@@ -26,6 +26,17 @@ defmodule Algorithms.Sets.SetCover do
 
       iex> SetCover.run(["java", "nodejs"], [["java", "nodejs"]])
       [0]
+
+  Triadic Pseudocode Protocol:
+    ALGO SetCover(universe, sets)  # Greedy approx
+    ├── DATA: IN: universe U, sets S → OUT: min cover sets[]
+    │   ├── covered: bitset/set for U
+    ├── ENUMERATE: WHILE covered != U
+    │   └── SELECT set with max |set - covered|
+    └── CONDITIONAL:
+        └── ADD selected to cover
+        └── covered ∪= selected set
+        # DP exact: 2^|S| states, too exponential for triad
   """
   def run(req_skills, people) do
     # Use dynamic programming with bitmasks to find the optimal solution

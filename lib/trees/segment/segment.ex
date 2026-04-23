@@ -5,6 +5,17 @@ defmodule Algorithms.Trees.Segment do
   Each operation returns a new tree state that must be passed to subsequent operations.
   This follows pure functional programming principles with no side effects.
 
+  Triadic Pseudocode Protocol:
+    ALGO SegmentTree(arr)  # Build/Query/Update
+    ├── DATA: IN: arr[n] → OUT: tree[4n]  # Range queries
+    ├── ENUMERATE: RECURSE build(1, 0, n-1)
+    │   └── tree[node] ← combine(left_child, right_child)
+    └── CONDITIONAL (Query l..r):
+        ├── IF fully covered → RETURN tree[node]
+        ├── IF no overlap → ∞/0/neutral
+        └── ELSE → Query left + Query right
+        # Update similar: RECURSE to leaf, bubble up combines
+
   Mnemonic:
   Build: Split array recursively, store values at leaves, bubble sums to parents
   Store: Map node_id→sum, track original array for updates

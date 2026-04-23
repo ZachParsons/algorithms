@@ -43,6 +43,17 @@ defmodule Algorithms.Collections.SlidingWindowMax do
   Use `run1/2` - more elegant and idiomatic Elixir code
 
   Both achieve O(n) time complexity with proper deque operations.
+
+  Triadic Pseudocode Protocol:
+    ALGO SlidingMax(arr, k)
+    ├── DATA: IN: arr[n], window k → OUT: maxes[n-k+1]
+    │   └── DEQUE: indices, decreasing values
+    ├── ENUMERATE: FOR i=0 to n-1
+    │   ├── CLEAN deque front (out of window)
+    │   └── CLEAN deque back (smaller than arr[i])
+    └── CONDITIONAL:
+        ├── PUSH i to deque
+        └── IF i >= k-1 → maxes[i-k+1] ← arr[deque.front]
   """
 
   def run0(nums, window_size) when window_size <= 0 or nums == [], do: []

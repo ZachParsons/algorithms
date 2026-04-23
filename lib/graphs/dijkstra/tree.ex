@@ -69,6 +69,21 @@ defmodule Algorithms.Graphs.Dijkstra.Tree do
         "E" => {11, "D"}
       }
 
+  Triadic Pseudocode Protocol:
+    ALGO Dijkstra(graph, start)
+    ├── DATA: IN: graph, start → OUT: distances[]
+    │   ├── PQ: min-heap (dist, node)
+    │   ├── dist[]: ∞ except dist[start]=0
+    │   └── prev[]: path reconstruction
+    ├── ENUMERATE: WHILE PQ not empty
+    │   └── u ← POP min-dist node
+    └── CONDITIONAL:
+        └── FOR neighbor v of u:
+            ├── IF dist[v] > dist[u] + weight(u,v):
+            │   ├── dist[v] ← dist[u] + weight(u,v)
+            │   ├── prev[v] ← u
+            │   └── PUSH (dist[v], v) to PQ
+
   Mnemonic:
 
   Base: graph → distance map {node: {dist, prev}} + priority queue
