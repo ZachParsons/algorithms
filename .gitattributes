@@ -1,0 +1,3 @@
+docs/workflow.md filter=git-crypt diff=git-crypt
+lib/private/** filter=git-crypt diff=git-crypt
+test/private/** filter=git-crypt diff=git-crypt
