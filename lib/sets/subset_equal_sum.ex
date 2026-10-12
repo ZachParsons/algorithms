@@ -5,29 +5,19 @@ defmodule Algorithms.Sets.SubsetEqualSum do
     trunced_target = trunc(target)
 
     if target == trunced_target do
-      table =
-        MapSet.new([{0, 0}])
+      base_row = MapSet.new([0])
 
-      input_length = length(input)
-
-      res =
-        Enum.reduce(1..input_length, table, fn row_idx, row_acc ->
-          input_el = Enum.at(input, row_idx - 1)
-
-          new_cells =
-            0..trunced_target
-            |> Enum.filter(fn col_idx ->
-              MapSet.member?(row_acc, {row_idx - 1, col_idx}) ||
-                (col_idx >= input_el &&
-                   MapSet.member?(row_acc, {row_idx - 1, col_idx - input_el}))
-            end)
-            |> Enum.map(&{row_idx, &1})
-            |> MapSet.new()
-
-          MapSet.union(row_acc, new_cells)
+      final_row =
+        Enum.reduce(input, base_row, fn value, row ->
+          0..trunced_target
+          |> Enum.filter(fn col_idx ->
+            MapSet.member?(row, col_idx) ||
+              (col_idx >= value && MapSet.member?(row, col_idx - value))
+          end)
+          |> MapSet.new()
         end)
 
-      MapSet.member?(res, {input_length, trunced_target})
+      MapSet.member?(final_row, trunced_target)
     else
       false
     end
